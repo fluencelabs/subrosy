@@ -1,0 +1,13 @@
+
+
+data Status:
+  status: string
+  peer_id: string
+  service_id: string
+
+service HealthCheckService:
+  check() -> Status
+
+service HealthCheckStorage:
+  store(status: Status)
+  get_all_last() -> []Status

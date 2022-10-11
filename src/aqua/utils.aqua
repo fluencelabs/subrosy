@@ -1,0 +1,16 @@
+import "@fluencelabs/registry/resources-api.aqua"
+import "@fluencelabs/registry/registry-service.aqua"
+
+
+
+func get_records(resource_id: string, consistency_level: i16) -> []Record, *Error:
+   records, error <- resolveResource(resource_id, consistency_level)
+   <- records, error
+
+func find_records(records: []Record, key: string) -> *Record:
+  result: *Record
+  for r <- records:
+    k = r.metadata.key_id
+    if k == key:
+      result <<- r
+  <- result
