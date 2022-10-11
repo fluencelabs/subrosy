@@ -38,7 +38,9 @@
 version: 2
 dependencies:
   npm:
-    "@fluencelabs/aqua": 0.7.6-347
+    "@fluencelabs/aqua": 0.7.7-349
+    "@fluencelabs/registry": 0.6.2
+    "@fluencelabs/aqua-ipfs": 0.5.5
   cargo:
     marine: 0.12.4
     mrepl: 0.18.6

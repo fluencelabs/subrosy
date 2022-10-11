@@ -1,0 +1,41 @@
+import "@fluencelabs/registry/resources-api.aqua"
+import "@fluencelabs/registry/registry-service.aqua"
+import "@fluencelabs/aqua-lib/builtin.aqua"
+import "@fluencelabs/aqua-ipfs/ipfs-api.aqua"
+
+func get_records(resource_id: string, consistency_level: i16) -> []Record, *Error:
+   records, error <- resolveResource(resource_id, consistency_level)
+   <- records, error
+
+func find_ipfs_record(records: []Record) -> *Record:
+  result: *Record
+  for r <- records:
+    k = r.metadata.key_id
+    if k == "IpfsAirScript":
+      result <<- r
+  <- result
+    
+
+func join(key: string):
+    records, error <- get_records(key, 5)
+    script_record <- find_ipfs_record(records)
+    rec = script_record[0]
+    path = get_from(rec.metadata.peer_id, rec.metadata.service_id!, "")
+    Script.add_from_vault(path.path, [10])
+
+    -- TODO: check if there is enough HealthCheckStorage services
+    --       if not, deploy one 
+
+-- fn healthcheck_script(key = "myApp"):
+--    records = registry.get_records(key)
+--    participants = records.filter(value == Participant)
+--    for p <- participants:
+--        on p.peer_id:
+--            HealhCheckableService p.service_id
+--            results <- HealhCheckableService.check(???)
+
+--    storages = records.filter(value == HealthCheckStorage)
+--    for s <- storages:
+--        for r <- results:
+--            HealthCheckStorage s.service_id
+--            HealthCheckStorage.store(r.peer_id, r.service_id, r.status)
