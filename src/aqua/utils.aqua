@@ -1,7 +1,10 @@
 import "@fluencelabs/registry/resources-api.aqua"
 import "@fluencelabs/registry/registry-service.aqua"
+import "@fluencelabs/aqua-lib/builtin.aqua"
 
-
+alias Error: string
+alias CID: string
+alias Multiaddr: string
 
 func get_records(resource_id: string, consistency_level: i16) -> ?[]Record, *Error:
    records, error <- resolveResource(resource_id, consistency_level)
@@ -14,3 +17,51 @@ func find_records(records: []Record, key: string) -> *Record:
     if k == key:
       result <<- r
   <- result
+
+func contains(set: *string, elem: string) -> bool:
+    contains: ?bool
+    for e <- set:
+        if e == elem:
+            contains <<- true
+
+    if contains == nil:
+        contains <<- false
+
+    <- contains!
+
+func set_insert(set: *string, elem: string) -> bool:
+    found = contains(set, elem)
+    if found == false:
+        set <<- elem
+
+    <- found
+
+func hosts_by_cid(records: []Record, cid: string) -> []PeerId:
+    filtered: *PeerId
+    for r <- records:
+        r_cid = r.metadata.service_id!
+        if r_cid == cid:
+            filtered <<- r.metadata.peer_id
+
+    <- filtered
+
+func group_by_cid(records: []Record) -> []CID, [][]PeerId:
+    cids: *CID
+    ipfs_hosts: *[]PeerId
+
+    for r <- records:
+        cid = r.metadata.service_id!
+        if contains(cids, cid) == false:
+            hosts <- hosts_by_cid(records, cid)
+            cids <<- cid
+            ipfs_hosts <<- hosts
+
+    <- cids, ipfs_hosts
+
+func script_records(records: []Record) -> []Record:
+    result: *Record
+    for r <- records:
+        if r.metadata.value == "role=ipfs_healthcheck_script":
+            result <<- r
+
+    <- result

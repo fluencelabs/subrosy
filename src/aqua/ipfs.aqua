@@ -1,0 +1,11 @@
+service IpfsClient("ipfs_client"):
+    id(multiaddr: string) -> string
+    exists(multiaddr: string, cid: string) -> bool
+    upload(multiaddr: string, path: string) -> string
+    remove(multiaddr: string, cid: string) -> string
+
+-- upload via local ipfs-client
+func upload(multiaddr: string, path: string) -> string:
+    on INIT_PEER_ID via HOST_PEER_ID:
+        cid <- IpfsClient.upload(multiaddr, path)
+        <- cid

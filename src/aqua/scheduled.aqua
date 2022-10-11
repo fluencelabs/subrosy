@@ -20,3 +20,6 @@ func healthcheck_script(key: string):
         for r <- statuses:
             HealthCheckStorage s.metadata.service_id[0]
             HealthCheckStorage.store(r)
+
+func simple():
+    Op.sha256_string("be simple!")
