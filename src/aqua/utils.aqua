@@ -3,7 +3,7 @@ import "@fluencelabs/registry/registry-service.aqua"
 
 
 
-func get_records(resource_id: string, consistency_level: i16) -> []Record, *Error:
+func get_records(resource_id: string, consistency_level: i16) -> ?[]Record, *Error:
    records, error <- resolveResource(resource_id, consistency_level)
    <- records, error
 

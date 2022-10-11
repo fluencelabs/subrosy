@@ -1,0 +1,25 @@
+{
+  "name": "subrosy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fluencelabs/subrosy.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fluencelabs/subrosy/issues"
+  },
+  "homepage": "https://github.com/fluencelabs/subrosy#readme",
+  "devDependencies": {
+    "@fluencelabs/registry": "nightly",
+    "@fluencelabs/aqua-lib": "0.6.0",
+    "@fluencelabs/aqua-ipfs": "0.5.5",
+    "@fluencelabs/aqua": "nightly"
+  }
+}
