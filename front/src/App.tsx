@@ -1,20 +1,39 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
+import { Container } from '@mui/system';
+import { services } from './data/mockData';
+import { ServiceHealthCheck } from './components/ServiceHealthCheck';
 
 function App() {
     return (
-        <div className="App">
-            <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo" />
-                <p>
-                    Edit <code>src/App.tsx</code> and save to reload.
-                </p>
-                <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-                    Learn React
-                </a>
-            </header>
-        </div>
+        <>
+            <AppBar position="static" style={{ marginBottom: 40 }}>
+                <Toolbar variant="dense">
+                    <IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
+                        Subrosy
+                    </IconButton>
+                    <Typography variant="h6" color="inherit" component="div">
+                        Key: 'mykey'
+                    </Typography>
+                </Toolbar>
+            </AppBar>
+            <Container maxWidth="xl">
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                        gap: 20,
+                    }}
+                >
+                    {services.map((x) => (
+                        <ServiceHealthCheck {...x} />
+                    ))}
+                </div>
+            </Container>
+        </>
     );
 }
 
