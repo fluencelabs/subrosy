@@ -1,13 +1,16 @@
 
 
-data Status:
+data HealthStatus:
   status: string
   peer_id: string
   service_id: string
+  last_update: u64
+
 
 service HealthCheckService:
-  check() -> Status
+  check() -> HealthStatus
 
 service HealthCheckStorage:
-  store(status: Status)
-  get_all_last() -> []Status
+  store(status: HealthStatus)
+  get_all_last() -> []HealthStatus
+  get_status(service_id: string) -> HealthStatus

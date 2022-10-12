@@ -4,6 +4,7 @@ import "@fluencelabs/aqua-lib/builtin.aqua"
 import "@fluencelabs/aqua-ipfs/ipfs-api.aqua"
 import "utils.aqua"
 import "ipfs.aqua"
+import "healthcheck_service.aqua"
 
 alias Error: string
 alias CID: string
@@ -139,3 +140,21 @@ func register_service(subnet: string, host: PeerId, service_id: string) -> [][]E
         errors <<- error_cre
 
     <- errors
+
+func get_health(subnet: string) -> []HealthStatus:
+    statuses: *HealthStatus
+
+    id, error_cre <- createResource(subnet)
+
+    if id != nil:
+        records, error_resolve <- get_records(subnet, 3) -- '3' acks
+
+    healthchek_storage_services <- find_records(records!, "role=healthcheckstorage")
+    services <- find_records(records!, "role=service")
+    for storage <- healthchek_storage_services par:
+        for srv <- services par:
+            on storage.metadata.peer_id:
+                HealthCheckStorage storage.metadata.service_id!
+                statuses <- HealthCheckStorage.get_status(srv.metadata.service_id!)
+
+    <- statuses

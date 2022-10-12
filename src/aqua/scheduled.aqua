@@ -8,7 +8,7 @@ func healthcheck_script(key: string):
     records, error <- get_records(key, 5)
     participants <- find_records(records!, "participant")
 
-    statuses: *Status
+    statuses: *HealthStatus
 
     for p <- participants:
         on p.metadata.peer_id:
