@@ -10,3 +10,10 @@ export const services: Array<ServiceHealthCheckProps> = Array.from({ length: 20 
         timestamp: new Date(),
     };
 });
+
+export const getServices = async (subnet: string) => {
+    await new Promise((resolve) => {
+        setTimeout(resolve, 2000);
+    });
+    return services;
+};
