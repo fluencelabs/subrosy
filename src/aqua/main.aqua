@@ -52,7 +52,7 @@ func upload_air(air_path: string, ipfs_host: PeerId) -> ?CID, ?Error:
 
     <- cid, error
 
-func register_healthcheck(subnet: string, air_cid: string, ipfs_host: PeerId) -> ?[]Error:
+func register_healthcheck(subnet: string, air_cid: string, ipfs_host: PeerId) -> ?ResourceId, ?[]Error:
     error: ?[]Error
 
     id, error_cre <- createResource(subnet)
@@ -64,23 +64,24 @@ func register_healthcheck(subnet: string, air_cid: string, ipfs_host: PeerId) ->
     else:
         error <<- error_cre
 
-    <- error
+    <- id, error
 
-func create_healthcheck(subnet: string, air_path: string, ipfs_host: PeerId) -> ?[]Error:
+func create_healthcheck(subnet: string, air_path: string, ipfs_host: PeerId) -> ?CID, ??ResourceId, ?[]Error:
     error: ?[]Error
+    id: ??ResourceId
 
     cid, upload_err <- upload_air(air_path, ipfs_host)
 
     Console.print(cid)
 
     if cid != nil:
-        reg_err <- register_healthcheck(subnet, cid!, ipfs_host)
+        id, reg_err <- register_healthcheck(subnet, cid!, ipfs_host)
         if reg_err != nil:
             error <<- reg_err!
     else:
         error <<- ["upload_air", ipfs_host, air_path, upload_err!]
 
-    <- error
+    <- cid, id, error
 
 
 func install_healthcheck_scripts(subnet: string, target_host: PeerId) -> [][]Error:

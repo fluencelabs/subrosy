@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/fluencelabs/subrosy#readme",
   "devDependencies": {
-    "@fluencelabs/aqua": "^0.7.7-352",
+    "@fluencelabs/aqua": "^0.7.7-353",
     "@fluencelabs/aqua-ipfs": "0.5.5",
     "@fluencelabs/aqua-lib": "0.6.0",
     "@fluencelabs/registry": "nightly"
