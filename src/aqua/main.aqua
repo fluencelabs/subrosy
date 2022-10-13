@@ -114,15 +114,26 @@ func install_healthcheck_scripts(subnet: string, target_host: PeerId) -> [][]Err
 
     <- errors
 
+service UCompare("cmp"):
+    gt(x: u32, y: u32) -> bool
+
 func enable_healthcheck(subnet: string):
     records, error <- get_records(subnet, 5)
     scripts <- find_records(records!, "IpfsAirScript")
     rec = scripts[0]
     path = get_from(rec.metadata.peer_id, rec.metadata.service_id!, "")
-    Script.add_from_vault(path.path, [10])
+    Script.add_from_vault(path.path, [60])
 
     service_records <- find_records(records!, "healthcheck_service")
+    -- is it correct to get the first one?
     service_record = service_records[0]
+
+    storage_records <- find_records(records!, "healthcheck_storage")
+
+    good_amount <- UCompare.gt(storage_records.length, service_records.length / 3)
+
+    if good_amount == false:
+        Op.noop()
     -- TODO: check if there is enough HealthCheckStorage services
     --       if not, deploy one
 
