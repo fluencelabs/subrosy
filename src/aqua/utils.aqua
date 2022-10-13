@@ -6,6 +6,11 @@ alias Error: string
 alias CID: string
 alias Multiaddr: string
 
+const IPFS_HEALTHCHECK_SCRIPT = "role=ipfs_healthcheck_script"
+const STORAGE = "role=healthcheckstorage"
+const SERVICE = "role=service"
+const PARTICIPANT = "role=participant"
+
 func get_records(resource_id: string, consistency_level: i16) -> ?[]Record, *Error:
    records, error <- resolveResource(resource_id, consistency_level)
    <- records, error

@@ -61,7 +61,7 @@ func register_healthcheck(subnet: string, air_cid: string, ipfs_host: PeerId) ->
     id, error_cre <- createResource(subnet)
 
     if id != nil:
-        registered, error_reg <- registerServiceRecord(id!, "role=ipfs_healthcheck_script", ipfs_host, ?[air_cid])
+        registered, error_reg <- registerServiceRecord(id!, IPFS_HEALTHCHECK_SCRIPT, ipfs_host, ?[air_cid])
         if registered == false:
             error <<- error_reg
     else:
@@ -97,7 +97,7 @@ func install_healthcheck_scripts(subnet: string, target_host: PeerId) -> [][]Err
         records, error_resolve <- resolveResource(id!, 3) -- '3' acks
         if records != nil:
             for r <- records!:
-                if r.metadata.value == "role=ipfs_healthcheck_script":
+                if r.metadata.value == IPFS_HEALTHCHECK_SCRIPT:
                     cid = r.metadata.service_id!
                     if contains(installed_cids, cid): -- if we hadn't install this cid yet, go install it
                         maddr <- get_external_api_multiaddr(r.metadata.peer_id)
@@ -122,18 +122,17 @@ service UCompare("cmp"):
 
 func enable_healthcheck(subnet: string):
     records, error <- get_records(subnet, 5)
-    scripts <- find_records(records!, "IpfsAirScript")
+    scripts <- find_records(records!, IPFS_HEALTHCHECK_SCRIPT)
     rec = scripts[0]
-    path = get_from(rec.metadata.peer_id, rec.metadata.service_id!, "")
-    Script.add_from_vault(path.path, [60])
+    install_healthcheck_scripts(subnet, rec.metadata.peer_id)
 
-    service_records <- find_records(records!, "healthcheck_service")
+    service_records <- find_records(records!, SERVICE)
     -- is it correct to get the first one?
     service_record = service_records[0]
 
     deploy_healthcheck_service(HOST_PEER_ID)
 
-    storage_records <- find_records(records!, "healthcheck_storage")
+    storage_records <- find_records(records!, STORAGE)
 
     good_amount <- UCompare.gt(storage_records.length, service_records.length / 3)
 
@@ -150,7 +149,7 @@ func register_service(subnet: string, host: PeerId, service_id: string) -> [][]E
     id, error_cre <- createResource(subnet)
 
     if id != nil:
-        registered, error_reg <- registerServiceRecord(id!, "role=service", host, ?[service_id])
+        registered, error_reg <- registerServiceRecord(id!, SERVICE, host, ?[service_id])
         if registered:
             enable_healthcheck(subnet)
         else:
@@ -168,8 +167,8 @@ func get_health(subnet: string) -> []HealthStatus:
     if id != nil:
         records, error_resolve <- get_records(subnet, 3) -- '3' acks
 
-    healthchek_storage_services <- find_records(records!, "role=healthcheckstorage")
-    services <- find_records(records!, "role=service")
+    healthchek_storage_services <- find_records(records!, STORAGE)
+    services <- find_records(records!, SERVICE)
     for storage <- healthchek_storage_services par:
         for srv <- services par:
             on storage.metadata.peer_id:

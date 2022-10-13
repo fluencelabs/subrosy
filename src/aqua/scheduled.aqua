@@ -6,7 +6,7 @@ import "healthcheck_service.aqua"
 
 func healthcheck_script(key: string):
     records, error <- get_records(key, 5)
-    participants <- find_records(records!, "participant")
+    participants <- find_records(records!, PARTICIPANT)
 
     statuses: *HealthStatus
 
@@ -15,7 +15,7 @@ func healthcheck_script(key: string):
             HealthCheckService p.metadata.service_id[0]
             statuses <- HealthCheckService.check()
 
-    storages = find_records(records!, "storage")
+    storages = find_records(records!, STORAGE)
     for s <- storages:
         for r <- statuses:
             HealthCheckStorage s.metadata.service_id[0]
