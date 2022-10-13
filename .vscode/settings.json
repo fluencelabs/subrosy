@@ -1,5 +1,8 @@
 {
   "aquaSettings.imports": [
+    "/home/pavel/work/fluence/subrosy/.fluence/aqua",
+    "/home/pavel/.fluence/npm/@fluencelabs/registry/nightly/node_modules",
+    "/home/pavel/.fluence/npm/@fluencelabs/aqua-ipfs/0.5.5/node_modules",
     ".fluence/aqua"
   ]
 }
