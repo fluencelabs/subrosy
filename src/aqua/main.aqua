@@ -30,6 +30,9 @@ func find_service(blueprint_id: string) -> ?Service:
     <- result
 
 func deploy_storage(subnet: string):
+    -- where to get blueprint_id?
+    bid = ""
+    sid <- Srv.create(bid)
     Op.noop()
 
 func deploy_healthcheck_service(where: string):
