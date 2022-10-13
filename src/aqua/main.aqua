@@ -29,10 +29,10 @@ func find_service(blueprint_id: string) -> ?Service:
         result <<- serv
     <- result
 
-func deploy_storage(records: []Record):
+func deploy_storage(subnet: string):
     Op.noop()
 
-func deploy_healthcheck_service(records: []Record):
+func deploy_healthcheck_service(where: string):
     Op.noop()
 
 
@@ -128,12 +128,16 @@ func enable_healthcheck(subnet: string):
     -- is it correct to get the first one?
     service_record = service_records[0]
 
+    deploy_healthcheck_service(HOST_PEER_ID)
+
     storage_records <- find_records(records!, "healthcheck_storage")
 
     good_amount <- UCompare.gt(storage_records.length, service_records.length / 3)
 
     if good_amount == false:
-        Op.noop()
+        -- TODO: how many storages to deploy
+        -- TODO: where to deploy
+        deploy_storage(subnet)
     -- TODO: check if there is enough HealthCheckStorage services
     --       if not, deploy one
 
