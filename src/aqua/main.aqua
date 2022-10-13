@@ -138,7 +138,7 @@ func enable_healthcheck(subnet: string):
     -- is it correct to get the first one?
     service_record = service_records[0]
 
-    deploy_healthcheck_service(HOST_PEER_ID)
+    deploy_healthcheck_service(subnet)
 
     storage_records <- find_records(records!, STORAGE)
 
