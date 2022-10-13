@@ -29,14 +29,22 @@ func find_service(blueprint_id: string) -> ?Service:
         result <<- serv
     <- result
 
-func deploy_storage(subnet: string):
-    -- where to get blueprint_id?
-    bid = ""
+func deploy(bid: string, tag: string, subnet: string) -> bool, *Error:
     sid <- Srv.create(bid)
-    Op.noop()
+    success, errors <- registerServiceRecord(subnet, tag, INIT_PEER_ID, [sid])
+    <- success, errors
+    
 
-func deploy_healthcheck_service(where: string):
-    Op.noop()
+func deploy_storage(subnet: string) -> bool, *Error:
+    -- where to get blueprint_id?
+    success, errors <- deploy("", STORAGE, subnet)
+    <- success, errors
+    
+
+func deploy_healthcheck_service(subnet: string) -> bool, *Error:
+    -- where to get blueprint_id?
+    success, errors <- deploy("", SERVICE, subnet)
+    <- success, errors
 
 
 func upload_air(air_path: string, ipfs_host: PeerId) -> ?CID, ?Error:
