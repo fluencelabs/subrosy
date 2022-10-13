@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import {
     AppBar,
@@ -15,6 +15,8 @@ import { getServices } from './data/mockData';
 import { ServiceHealthCheck, ServiceHealthCheckProps } from './components/ServiceHealthCheck';
 import { styled, alpha } from '@mui/material/styles';
 import Lan from '@mui/icons-material/Lan';
+import { Fluence } from '@fluencelabs/fluence';
+import { stage } from '@fluencelabs/fluence-network-environment';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -58,10 +60,24 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     },
 }));
 
+const peerConfig = {
+    connectTo: stage[5],
+};
+
 function App() {
     const [subnet, setSubnet] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [services, setServices] = useState<ServiceHealthCheckProps[]>([]);
+
+    useEffect(() => {
+        Fluence.start(peerConfig)
+            .then(() => {
+                console.log('connected');
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    });
 
     const search: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement> = async (arg) => {
         const subnet = arg.target.value;
