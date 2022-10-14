@@ -2,6 +2,7 @@ import "@fluencelabs/registry/resources-api.aqua"
 import "@fluencelabs/registry/registry-service.aqua"
 import "@fluencelabs/aqua-lib/builtin.aqua"
 import "@fluencelabs/aqua-ipfs/ipfs-api.aqua"
+import "@fluencelabs/aqua-ipfs/ipfs.aqua"
 import "utils.aqua"
 import "ipfs.aqua"
 import "healthcheck_service.aqua"
@@ -33,13 +34,13 @@ func deploy(bid: string, tag: string, subnet: string) -> bool, *Error:
     sid <- Srv.create(bid)
     success, errors <- registerServiceRecord(subnet, tag, INIT_PEER_ID, [sid])
     <- success, errors
-    
+
 
 func deploy_storage(subnet: string) -> bool, *Error:
     -- where to get blueprint_id?
     success, errors <- deploy("", STORAGE, subnet)
     <- success, errors
-    
+
 
 func deploy_healthcheck_service(subnet: string) -> bool, *Error:
     -- where to get blueprint_id?
@@ -94,36 +95,34 @@ func create_healthcheck(subnet: string, air_path: string, ipfs_host: PeerId) -> 
 
     <- cid, id, error
 
-
-func install_healthcheck_scripts(subnet: string, target_host: PeerId) -> [][]Error:
+func install_healthcheck_scripts(subnet_id: ResourceId, target_host: PeerId) -> []IpfsMultiaddrResult, []string, [][]Error:
     errors: *[]Error
     installed_cids: *string
+    scripts: *string
+    maddrs: *IpfsMultiaddrResult
 
-    id, error_cre <- createResource(subnet)
-
-    if id != nil:
-        records, error_resolve <- resolveResource(id!, 3) -- '3' acks
-        if records != nil:
-            for r <- records!:
-                if r.metadata.value == IPFS_HEALTHCHECK_SCRIPT:
-                    cid = r.metadata.service_id!
-                    if contains(installed_cids, cid): -- if we hadn't install this cid yet, go install it
-                        maddr <- get_external_api_multiaddr(r.metadata.peer_id)
-                        if maddr.success:
-                            get <- get_from(target_host, cid, maddr.multiaddr)
-                            if get.success:
-                                on target_host:
-                                    Script.add_from_vault(get.path, ?[10])
-                            else:
-                                errors <<- ?["ipfs.get", cid, get.error]
+    records, error_resolve <- resolveResource(subnet_id, 3) -- '3' acks
+    if records != nil:
+        for r <- records!:
+            if r.metadata.value == IPFS_HEALTHCHECK_SCRIPT:
+                cid = r.metadata.service_id!
+                if contains(installed_cids, cid) == false: -- if we hadn't install this cid yet, go install it
+                    maddr <- get_external_api_multiaddr(r.metadata.peer_id)
+                    maddrs <<- maddr
+                    if maddr.success:
+                        get <- get_from(target_host, cid, maddr.multiaddr)
+                        if get.success:
+                            on target_host:
+                                scripts <- Script.add_from_vault(get.path, ?[10])
+                            installed_cids <<- cid
                         else:
-                            errors <<- ?["get_external_api_multiaddr", r.metadata.peer_id, maddr.error]
-        else:
-            errors <<- error_resolve
+                            errors <<- ?["ipfs.get", cid, get.error]
+                    else:
+                        errors <<- ?["get_external_api_multiaddr", r.metadata.peer_id, maddr.error]
     else:
-        errors <<- error_cre
+        errors <<- error_resolve
 
-    <- errors
+    <- maddrs, scripts, errors
 
 service UCompare("cmp"):
     gt(x: u32, y: u32) -> bool
@@ -175,11 +174,11 @@ func get_health(subnet: string) -> []HealthStatus:
     if id != nil:
         records, error_resolve <- get_records(subnet, 3) -- '3' acks
 
-    healthchek_storage_services <- find_records(records!, STORAGE)
+    storages <- find_records(records!, STORAGE)
     services <- find_records(records!, SERVICE)
-    for storage <- healthchek_storage_services par:
+    for storage <- storages par:
         for srv <- services par:
-            on storage.metadata.peer_id:
+            on storage.metadata.peer_id via storage.metadata.relay_id:
                 HealthCheckStorage storage.metadata.service_id!
                 statuses <- HealthCheckStorage.get_status(srv.metadata.service_id!)
 

@@ -7,7 +7,7 @@ setLogLevel('INFO');
 
 export const initAsync = async (): Promise<void> => {
     // peer id: 12D3KooWMJMp17Q6GR54AkLc3EUkVinLS9YQUTawvs7QVJKzuQYw
-    const sk = Buffer.from('SVz4T4yW718wt0rziDVOfiv6+WQbS4lvEtJHEieXcAk=', 'base64');
+    const sk = Buffer.from('SVz4T4yW718wt0rziDVOaiv6+WQbS4lvEtJHEieXcAk=', 'base64');
 
     const peerConfig: PeerConfig = {
         KeyPair: await KeyPair.fromEd25519SK(sk),

@@ -21,5 +21,9 @@ func healthcheck_script(key: string):
             HealthCheckStorage s.metadata.service_id[0]
             HealthCheckStorage.store(r)
 
+service Console("run-console"):
+    print(msgs: []string)
+
 func simple():
-    Op.sha256_string("be simple!")
+    on "12D3KooWDw6rKAG28mg9gs7aWYT9TZEMYTfb5hzPR7zTuZXwuBKE" via "12D3KooWDcpWuyrMTDinqNgmXAuRdfd2mTdY9VoXZSAet2pDzh6r":
+        Console.print(["simpleeeeee"])
