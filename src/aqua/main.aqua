@@ -184,3 +184,13 @@ func get_health(subnet: string) -> []HealthStatus:
                 statuses <- HealthCheckStorage.get_status(srv.metadata.service_id!)
 
     <- statuses
+
+func demoConsole():
+    messages: *string
+
+    messages <<- "1"
+    messages <<- "2"
+    messages <<- "3"
+
+    on "12D3KooWMJMp17Q6GR54AkLc3EUkVinLS9YQUTawvs7QVJKzuQYw" via "12D3KooWDcpWuyrMTDinqNgmXAuRdfd2mTdY9VoXZSAet2pDzh6r":
+        Console.print(messages)

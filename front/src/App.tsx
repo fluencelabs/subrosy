@@ -15,9 +15,8 @@ import { getServices } from './data/mockData';
 import { ServiceHealthCheck, ServiceHealthCheckProps } from './components/ServiceHealthCheck';
 import { styled, alpha } from '@mui/material/styles';
 import Lan from '@mui/icons-material/Lan';
-import { Fluence, PeerConfig, setLogLevel } from '@fluencelabs/fluence';
-import { krasnodar, stage } from '@fluencelabs/fluence-network-environment';
 import { get_health } from './aqua/main';
+import { init } from './fluence';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -61,34 +60,18 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     },
 }));
 
-const peerConfig: PeerConfig = {
-    // connectTo: stage[5],
-    connectTo: krasnodar[3],
-    skipCheckConnection: true,
-};
-
-setLogLevel('INFO');
-
 function App() {
     const [subnet, setSubnet] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [services, setServices] = useState<ServiceHealthCheckProps[]>([]);
 
-    useEffect(() => {
-        Fluence.start(peerConfig)
-            .then(() => {
-                console.log('connected');
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    }, []);
+    useEffect(init, []);
 
     const search: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement> = async (arg) => {
         const subnet = arg.target.value;
         setSubnet(subnet);
         setIsLoading(true);
-        await get_health(subnet);
+        // await get_health(subnet);
         const res = await getServices(subnet);
         setIsLoading(false);
         setServices(res);

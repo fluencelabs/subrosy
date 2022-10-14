@@ -44,6 +44,7 @@ dependencies:
   cargo:
     marine: 0.12.4
     mrepl: 0.18.6
+relays: stage
 services:
   healthstore:
     get: src/services/health-store
