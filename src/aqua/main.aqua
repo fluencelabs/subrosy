@@ -80,6 +80,9 @@ func create_healthcheck(subnet: ResourceId, air_path: string, ipfs_host: PeerId)
 
     <- cid, errors
 
+service IOp("op"):
+    identity(i: u32) -> u32
+
 func create_subnet(subnet_label: string, air_path: string, ipfs_hosts: []PeerId) -> ?ResourceId, u32, []Error:
     errors: *Error
     uploaded: *bool
@@ -94,7 +97,8 @@ func create_subnet(subnet_label: string, air_path: string, ipfs_hosts: []PeerId)
                 for e <- errors_hc!:
                     errors <<- e
 
-            join uploaded[ipfs_hosts.length]
+            l = IOp.identity(ipfs_hosts.length)
+            join uploaded[l]
             par Peer.timeout(PARTICLE_TTL * 8 / 10, "")
 
     else:
@@ -102,8 +106,9 @@ func create_subnet(subnet_label: string, air_path: string, ipfs_hosts: []PeerId)
             errors <<- e
 
     uploaded_can = uploaded
+    uploaded_len = IOp.identity(uploaded_can.length)
 
-    <- subnet, uploaded_can.length, errors
+    <- subnet, uploaded_len, errors
 
 -- Register deployed HealthStorage service to subnet
 func register_storage(subnet: ResourceId, storage_id: string, host: PeerId):
