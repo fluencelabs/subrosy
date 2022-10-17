@@ -50,4 +50,8 @@ services:
     get: src/services/health-store
     deploy:
       - deployId: default
+  example:
+    get: src/services/example
+    deploy:
+      - deployId: default
 

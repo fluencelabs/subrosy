@@ -30,6 +30,18 @@ pub struct HealthStatus {
 }
 
 #[marine]
+pub fn store_status(status: String, host: String, service_id: String, timestamp: u64) {
+    let status = HealthStatus {
+        status,
+        peer_id: host,
+        service_id,
+        last_update: timestamp
+    };
+
+    store(status);
+}
+
+#[marine]
 pub fn store(status: HealthStatus) {
     let HealthStatus {
         status,
