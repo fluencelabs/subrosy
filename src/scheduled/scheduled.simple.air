@@ -3,15 +3,39 @@
 ; If you find any bugs, please write an issue on GitHub: https://github.com/fluencelabs/aqua/issues
 ; Aqua version: 0.7.7-353
 
-(seq
+(xor
  (seq
-  (call "12D3KooWDcpWuyrMTDinqNgmXAuRdfd2mTdY9VoXZSAet2pDzh6r" ("op" "noop") [])
-  (new $array-inline
+  (seq
    (seq
-    (ap "simpleeeeee" $array-inline)
-    (canon "12D3KooWDw6rKAG28mg9gs7aWYT9TZEMYTfb5hzPR7zTuZXwuBKE" $array-inline  #array-inline-0)
+    (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
+    (call -relay- ("op" "noop") [])
+   )
+   (call "12D3KooWDcpWuyrMTDinqNgmXAuRdfd2mTdY9VoXZSAet2pDzh6r" ("op" "noop") [])
+  )
+  (xor
+   (seq
+    (seq
+     (seq
+      (new $array-inline
+       (seq
+        (ap "simpleeeeee" $array-inline)
+        (canon "12D3KooWDw6rKAG28mg9gs7aWYT9TZEMYTfb5hzPR7zTuZXwuBKE" $array-inline  #array-inline-0)
+       )
+      )
+      (call "12D3KooWDw6rKAG28mg9gs7aWYT9TZEMYTfb5hzPR7zTuZXwuBKE" ("run-console" "print") [#array-inline-0])
+     )
+     (call "12D3KooWDcpWuyrMTDinqNgmXAuRdfd2mTdY9VoXZSAet2pDzh6r" ("op" "noop") [])
+    )
+    (call -relay- ("op" "noop") [])
+   )
+   (seq
+    (seq
+     (call "12D3KooWDcpWuyrMTDinqNgmXAuRdfd2mTdY9VoXZSAet2pDzh6r" ("op" "noop") [])
+     (call -relay- ("op" "noop") [])
+    )
+    (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
    )
   )
  )
- (call "12D3KooWDw6rKAG28mg9gs7aWYT9TZEMYTfb5hzPR7zTuZXwuBKE" ("run-console" "print") [#array-inline-0])
+ (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
 )

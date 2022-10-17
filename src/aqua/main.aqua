@@ -105,6 +105,10 @@ func create_subnet(subnet_label: string, air_path: string, ipfs_hosts: []PeerId)
 
     <- subnet, uploaded_can.length, errors
 
+-- Register deployed HealthStorage service to subnet
+func register_storage(subnet: ResourceId, storage_id: string, host: PeerId):
+    registered, err_reg <- registerServiceRecord(subnet, STORAGE, host, ?[storage_id])
+
 
 -- Install subnet's healthcheck scripts as scheduled scripts to `target_host` peer
 func install_healthcheck_scripts(scripts: []Record, target_host: PeerId) -> []string, [][]Error:
