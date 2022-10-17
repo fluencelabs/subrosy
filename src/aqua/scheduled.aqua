@@ -4,26 +4,34 @@ import "@fluencelabs/aqua-lib/builtin.aqua"
 import "utils.aqua"
 import "healthcheck_service.aqua"
 
-func healthcheck_script(key: string):
-    records, error <- get_records(key, 5)
-    participants <- find_records(records!, PARTICIPANT)
-
-    statuses: *HealthStatus
-
-    for p <- participants:
-        on p.metadata.peer_id:
-            HealthCheckService p.metadata.service_id[0]
-            statuses <- HealthCheckService.check()
-
-    storages = find_records(records!, STORAGE)
-    for s <- storages:
-        for r <- statuses:
-            HealthCheckStorage s.metadata.service_id[0]
-            HealthCheckStorage.store(r)
-
 service Console("run-console"):
     print(msgs: []string)
 
 func simple():
     on "12D3KooWDw6rKAG28mg9gs7aWYT9TZEMYTfb5hzPR7zTuZXwuBKE" via "12D3KooWDcpWuyrMTDinqNgmXAuRdfd2mTdY9VoXZSAet2pDzh6r":
         Console.print(["simpleeeeee"])
+
+service ExampleService:
+    ok: -> bool
+
+func check_examples(subnet: ResourceId):
+    records, errs_get <- get_records(subnet, 5)
+    if records != nil:
+        services <- find_records(records!, SERVICE)
+        storages <- find_records(records!, STORAGE)
+
+        for s <- services par:
+            on s.metadata.peer_id via s.metadata.relay_id:
+                ExampleService s.metadata.service_id!
+                ok <- ExampleService.ok()
+                status: ?string
+                if ok:
+                    status <<- "OK"
+                else:
+                    status <<- "BAD"
+
+                for storage <- storages par:
+                    on storage.metadata.peer_id via storage.metadata.relay_id:
+                        ts <- Peer.timestamp_ms()
+                        HealthCheckStorage storage.metadata.service_id!
+                        HealthCheckStorage.store_status(status!, s.metadata.peer_id, s.metadata.service_id!, ts)

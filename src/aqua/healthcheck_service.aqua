@@ -1,4 +1,4 @@
-
+import "@fluencelabs/aqua-lib/builtin.aqua"
 
 data HealthStatus:
   status: string
@@ -6,11 +6,8 @@ data HealthStatus:
   service_id: string
   last_update: u64
 
-
-service HealthCheckService:
-  check() -> HealthStatus
-
 service HealthCheckStorage:
+  store_status(status: string, host: PeerId, service_id: string, timestamp: u64)
   store(status: HealthStatus)
   get_all_last() -> []HealthStatus
   get_status(service_id: string) -> HealthStatus
