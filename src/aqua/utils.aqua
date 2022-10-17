@@ -23,6 +23,28 @@ func find_records(records: []Record, key: string) -> *Record:
       result <<- r
   <- result
 
+func contains_rec(set: []Record, e: Record, f: Record, Record -> bool) -> bool:
+    contains: ?bool
+    for r <- set:
+        if f(r, e):
+            contains <<- true
+
+    if contains == nil:
+        contains <<- false
+
+    <- contains!
+
+func contains_peer_id(set: []Record, pid: PeerId) -> bool:
+    contains: ?bool
+    for r <- set:
+        if r.metadata.peer_id == pid:
+            contains <<- true
+
+    if contains == nil:
+        contains <<- false
+
+    <- contains!
+
 func contains(set: *string, elem: string) -> bool:
     contains: ?bool
     for e <- set:

@@ -64,107 +64,102 @@ func upload_air(air_path: string, ipfs_host: PeerId) -> ?CID, ?Error:
 
     <- cid, error
 
-func register_healthcheck(subnet: string, air_cid: string, ipfs_host: PeerId) -> ?ResourceId, ?[]Error:
-    error: ?[]Error
-
-    id, error_cre <- createResource(subnet)
-
-    if id != nil:
-        registered, error_reg <- registerServiceRecord(id!, IPFS_HEALTHCHECK_SCRIPT, ipfs_host, ?[air_cid])
-        if registered == false:
-            error <<- error_reg
-    else:
-        error <<- error_cre
-
-    <- id, error
-
-func create_healthcheck(subnet: string, air_path: string, ipfs_host: PeerId) -> ?CID, ??ResourceId, ?[]Error:
-    error: ?[]Error
-    id: ??ResourceId
+func create_healthcheck(subnet: ResourceId, air_path: string, ipfs_host: PeerId) -> ?CID, ?[]Error:
+    errors: ?[]Error
 
     cid, upload_err <- upload_air(air_path, ipfs_host)
 
     Console.print(cid)
 
     if cid != nil:
-        id, reg_err <- register_healthcheck(subnet, cid!, ipfs_host)
-        if reg_err != nil:
-            error <<- reg_err!
+        registered, err_reg <- registerServiceRecord(subnet, IPFS_HEALTHCHECK_SCRIPT, ipfs_host, ?[cid!])
+        if err_reg != nil:
+            errors <<- err_reg
     else:
-        error <<- ["upload_air", ipfs_host, air_path, upload_err!]
+        errors <<- ["upload_air", ipfs_host, air_path, upload_err!]
 
-    <- cid, id, error
+    <- cid, errors
 
-func install_healthcheck_scripts(subnet_id: ResourceId, target_host: PeerId) -> []IpfsMultiaddrResult, []string, [][]Error:
+func create_subnet(subnet_label: string, air_path: string, ipfs_hosts: []PeerId) -> ?ResourceId, u32, []Error:
+    errors: *Error
+    uploaded: *bool
+
+    subnet, errors_cre <- createResource(subnet_label)
+
+    if subnet != nil:
+        for ipfs <- ipfs_hosts par:
+            cid, errors_hc <- create_healthcheck(subnet!, air_path, ipfs)
+            uploaded <<- true
+            if errors_hc != nil:
+                for e <- errors_hc!:
+                    errors <<- e
+
+            join uploaded[ipfs_hosts.length]
+            par Peer.timeout(PARTICLE_TTL * 8 / 10, "")
+
+    else:
+        for e <- errors_cre:
+            errors <<- e
+
+    uploaded_can = uploaded
+
+    <- subnet, uploaded_can.length, errors
+
+
+-- Install subnet's healthcheck scripts as scheduled scripts to `target_host` peer
+func install_healthcheck_scripts(scripts: []Record, target_host: PeerId) -> []string, [][]Error:
     errors: *[]Error
     installed_cids: *string
-    scripts: *string
+    installed_scripts: *string
     maddrs: *IpfsMultiaddrResult
 
-    records, error_resolve <- resolveResource(subnet_id, 3) -- '3' acks
-    if records != nil:
-        for r <- records!:
-            if r.metadata.value == IPFS_HEALTHCHECK_SCRIPT:
-                cid = r.metadata.service_id!
-                if contains(installed_cids, cid) == false: -- if we hadn't install this cid yet, go install it
-                    maddr <- get_external_api_multiaddr(r.metadata.peer_id)
-                    maddrs <<- maddr
-                    if maddr.success:
-                        get <- get_from(target_host, cid, maddr.multiaddr)
-                        if get.success:
-                            on target_host:
-                                scripts <- Script.add_from_vault(get.path, ?[10])
-                            installed_cids <<- cid
-                        else:
-                            errors <<- ?["ipfs.get", cid, get.error]
+    for r <- scripts:
+        if r.metadata.value == IPFS_HEALTHCHECK_SCRIPT:
+            cid = r.metadata.service_id!
+            if contains(installed_cids, cid) == false: -- if we hadn't install this cid yet, go install it
+                maddr <- get_external_api_multiaddr(r.metadata.peer_id)
+                maddrs <<- maddr
+                if maddr.success:
+                    get <- get_from(target_host, cid, maddr.multiaddr)
+                    if get.success:
+                        on target_host:
+                            installed_scripts <- Script.add_from_vault(get.path, ?[10])
+                        installed_cids <<- cid
                     else:
-                        errors <<- ?["get_external_api_multiaddr", r.metadata.peer_id, maddr.error]
-    else:
-        errors <<- error_resolve
+                        errors <<- ?["ipfs.get", cid, get.error]
+                else:
+                    errors <<- ?["get_external_api_multiaddr", r.metadata.peer_id, maddr.error]
 
-    <- maddrs, scripts, errors
+    <- installed_scripts, errors
 
-service UCompare("cmp"):
-    gt(x: u32, y: u32) -> bool
+-- It's the key owner's job to make sure that there are enough HealthStorage services
+-- maybe there are NO storage services? it's all hidden inside the healthcheck script anyway
 
-func enable_healthcheck(subnet: string):
-    records, error <- get_records(subnet, 5)
-    scripts <- find_records(records!, IPFS_HEALTHCHECK_SCRIPT)
-    rec = scripts[0]
-    install_healthcheck_scripts(subnet, rec.metadata.peer_id)
-
-    service_records <- find_records(records!, SERVICE)
-    -- is it correct to get the first one?
-    service_record = service_records[0]
-
-    deploy_healthcheck_service(subnet)
-
-    storage_records <- find_records(records!, STORAGE)
-
-    good_amount <- UCompare.gt(storage_records.length, service_records.length / 3)
-
-    if good_amount == false:
-        -- TODO: how many storages to deploy
-        -- TODO: where to deploy
-        deploy_storage(subnet)
-    -- TODO: check if there is enough HealthCheckStorage services
-    --       if not, deploy one
-
-func register_service(subnet: string, host: PeerId, service_id: string) -> [][]Error:
+func enable_healthcheck(subnet: string, host: PeerId) -> [][]Error:
     errors: *[]Error
 
-    id, error_cre <- createResource(subnet)
+    records, error <- get_records(subnet, 5)
 
-    if id != nil:
-        registered, error_reg <- registerServiceRecord(id!, SERVICE, host, ?[service_id])
-        if registered:
-            enable_healthcheck(subnet)
-        else:
-            errors <<- error_reg
+    if records != nil:
+        if contains_peer_id(records!, host) == false:
+            scripts <- find_records(records!, IPFS_HEALTHCHECK_SCRIPT)
+            installed_scripts, install_errs <- install_healthcheck_scripts(scripts, host)
+            for err <- install_errs:
+                errors <<- err
     else:
-        errors <<- error_cre
+        errors <<- error
 
     <- errors
+
+func join_subnet(subnet: ResourceId, host: PeerId, service_id: string) -> []Error:
+    errors: *[]Error
+
+    registered, error_reg <- registerServiceRecord(subnet, SERVICE, host, ?[service_id])
+    -- TODO: check that service wasn't registered yet?
+    if registered:
+        enable_healthcheck(subnet, host)
+
+    <- error_reg
 
 func get_health(subnet: string) -> []HealthStatus:
     statuses: *HealthStatus
@@ -183,13 +178,3 @@ func get_health(subnet: string) -> []HealthStatus:
                 statuses <- HealthCheckStorage.get_status(srv.metadata.service_id!)
 
     <- statuses
-
-func demoConsole():
-    messages: *string
-
-    messages <<- "1"
-    messages <<- "2"
-    messages <<- "3"
-
-    on "12D3KooWMJMp17Q6GR54AkLc3EUkVinLS9YQUTawvs7QVJKzuQYw" via "12D3KooWDcpWuyrMTDinqNgmXAuRdfd2mTdY9VoXZSAet2pDzh6r":
-        Console.print(messages)
