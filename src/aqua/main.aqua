@@ -83,6 +83,9 @@ func create_healthcheck(subnet: ResourceId, air_path: string, ipfs_host: PeerId)
 service IOp("op"):
     identity(i: u32) -> u32
 
+service BOp("op"):
+    array_length(arr: []bool) -> u32
+
 func create_subnet(subnet_label: string, air_path: string, ipfs_hosts: []PeerId) -> ?ResourceId, u32, []Error:
     errors: *Error
     uploaded: *bool
@@ -97,7 +100,7 @@ func create_subnet(subnet_label: string, air_path: string, ipfs_hosts: []PeerId)
                 for e <- errors_hc!:
                     errors <<- e
 
-            l = IOp.identity(ipfs_hosts.length)
+            l = Op.array_length(ipfs_hosts) --IOp.identity(ipfs_hosts.length)
             join uploaded[l]
             par Peer.timeout(PARTICLE_TTL * 8 / 10, "")
 
@@ -106,7 +109,7 @@ func create_subnet(subnet_label: string, air_path: string, ipfs_hosts: []PeerId)
             errors <<- e
 
     uploaded_can = uploaded
-    uploaded_len = IOp.identity(uploaded_can.length)
+    uploaded_len = BOp.array_length(uploaded_can) --IOp.identity(uploaded_can.length)
 
     <- subnet, uploaded_len, errors
 
