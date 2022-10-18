@@ -14,8 +14,9 @@ func simple():
 service ExampleService:
     ok: -> bool
 
-func check_examples(subnet: ResourceId):
-    records, errs_get <- get_records(subnet, 5)
+const SUBNET = "8QHLESWXC5UKheU9UJ9MthgTTxaUULnPAdw2VFrmnn7o"
+func check_examples():
+    records, errs_get <- get_records(SUBNET, 5)
     if records != nil:
         services <- find_records(records!, SERVICE)
         storages <- find_records(records!, STORAGE)

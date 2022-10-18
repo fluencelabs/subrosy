@@ -29,6 +29,14 @@ aqua run --timeout 100000 -i src/aqua -f 'create_subnet("folex", "/Users/folex/D
 
 
 ## Debug
-list_records
+### list_records
 - list_records(subnet: ResourceId)
 - aqua run --timeout 100000 -i src/aqua -f 'list_records("8QHLESWXC5UKheU9UJ9MthgTTxaUULnPAdw2VFrmnn7o")' --addr stage-01 --plugin src/plugins
+
+### enable_healthcheck
+- enable_healthcheck(subnet: string, host: PeerId) -> []string, [][]Error:
+- aqua run --timeout 100000 -i src/aqua -f 'enable_healthcheck("8QHLESWXC5UKheU9UJ9MthgTTxaUULnPAdw2VFrmnn7o", "12D3KooWHCJbJKGDfCgHSoCuK9q4STyRnVveqLoXAPBbXHTZx9Cv")' --addr stage-01 --plugin src/plugins
+
+### create_healthcheck
+- create_healthcheck(subnet: ResourceId, air_path: string, ipfs_host: PeerId)
+- aqua run --timeout 100000 -i src/aqua -f 'create_healthcheck("8QHLESWXC5UKheU9UJ9MthgTTxaUULnPAdw2VFrmnn7o", "/Users/folex/Development/fluencelabs/subrosy/src/scheduled/scheduled.simple.air", "12D3KooWHCJbJKGDfCgHSoCuK9q4STyRnVveqLoXAPBbXHTZx9Cv")' --addr stage-01 --plugin src/plugins

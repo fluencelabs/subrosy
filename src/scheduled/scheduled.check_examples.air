@@ -3,119 +3,78 @@
 ; If you find any bugs, please write an issue on GitHub: https://github.com/fluencelabs/aqua/issues
 ; Aqua version: 0.7.7-353
 
-(xor
- (seq
-  (seq
-   (call %init_peer_id% ("getDataSrv" "-relay-") [] -relay-)
-   (call %init_peer_id% ("getDataSrv" "subnet") [] subnet)
-  )
+(new $storages
+ (new $services
   (new $errs_get
-   (new $storages
-    (new $services
+   (seq
+    (seq
      (seq
       (seq
        (seq
-        (seq
-         (seq
-          (new $records
-           (new $successful
-            (new $result
+        (new $records
+         (new $successful
+          (new $result
+           (seq
+            (seq
              (seq
-              (xor
+              (seq
                (seq
+                (call %init_peer_id% ("op" "string_to_b58") ["8QHLESWXC5UKheU9UJ9MthgTTxaUULnPAdw2VFrmnn7o"] k)
+                (call %init_peer_id% ("kad" "neighborhood") [k [] []] nodes)
+               )
+               (par
+                (fold nodes n-0
+                 (par
+                  (seq
+                   (xor
+                    (seq
+                     (seq
+                      (call n-0 ("peer" "timestamp_sec") [] t)
+                      (call n-0 ("registry" "get_records") ["8QHLESWXC5UKheU9UJ9MthgTTxaUULnPAdw2VFrmnn7o" t] get_result)
+                     )
+                     (xor
+                      (match get_result.$.success! true
+                       (seq
+                        (ap get_result.$.result! $records)
+                        (ap true $successful)
+                       )
+                      )
+                      (ap get_result.$.error! $error-0)
+                     )
+                    )
+                    (call n-0 ("op" "noop") [])
+                   )
+                   (call %init_peer_id% ("op" "noop") [])
+                  )
+                  (next n-0)
+                 )
+                 (never)
+                )
+                (null)
+               )
+              )
+              (new $status-0
+               (new $result-0
                 (seq
                  (seq
                   (seq
-                   (call -relay- ("op" "string_to_b58") [subnet] k)
-                   (call -relay- ("kad" "neighborhood") [k [] []] nodes)
-                  )
-                  (par
-                   (fold nodes n-0
-                    (par
-                     (seq
-                      (xor
-                       (xor
-                        (seq
-                         (seq
-                          (call n-0 ("peer" "timestamp_sec") [] t)
-                          (call n-0 ("registry" "get_records") [subnet t] get_result)
-                         )
-                         (xor
-                          (match get_result.$.success! true
-                           (seq
-                            (ap get_result.$.result! $records)
-                            (ap true $successful)
-                           )
-                          )
-                          (ap get_result.$.error! $error-0)
-                         )
-                        )
-                        (call n-0 ("op" "noop") [])
-                       )
-                       (seq
-                        (call -relay- ("op" "noop") [])
-                        (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 1])
-                       )
-                      )
-                      (call -relay- ("op" "noop") [])
-                     )
-                     (next n-0)
-                    )
-                    (never)
-                   )
-                   (null)
-                  )
-                 )
-                 (new $status-0
-                  (new $result-0
-                   (seq
+                   (par
                     (seq
                      (seq
-                      (par
+                      (call %init_peer_id% ("math" "sub") [5 1] sub)
+                      (new $successful_test
                        (seq
-                        (seq
-                         (call -relay- ("math" "sub") [5 1] sub)
-                         (new $successful_test
-                          (seq
-                           (fold $successful s
-                            (seq
-                             (seq
-                              (seq
-                               (call -relay- ("math" "add") [sub 1] incr_idx)
-                               (ap s $successful_test)
-                              )
-                              (canon -relay- $successful_test  #successful_iter_canon)
-                             )
-                             (xor
-                              (match #successful_iter_canon.length incr_idx
-                               (null)
-                              )
-                              (next s)
-                             )
-                            )
-                            (never)
-                           )
-                           (canon -relay- $successful_test  #successful_result_canon)
-                          )
-                         )
-                        )
-                        (ap "ok" $status-0)
-                       )
-                       (call -relay- ("peer" "timeout") [6000 "timeout"] $status-0)
-                      )
-                      (new $status-0_test
-                       (seq
-                        (fold $status-0 s
+                        (fold $successful s
                          (seq
                           (seq
                            (seq
-                            (call -relay- ("math" "add") [0 1] incr_idx)
-                            (ap s $status-0_test)
+                            (call %init_peer_id% ("math" "add") [sub 1] incr_idx)
+                            (ap s $successful_test)
                            )
-                           (canon -relay- $status-0_test  #status-0_iter_canon)
+                           (canon %init_peer_id% $successful_test  #successful_iter_canon)
                           )
                           (xor
-                           (match #status-0_iter_canon.length incr_idx
+                           (match #successful_iter_canon.length incr_idx
                             (null)
                            )
                            (next s)
@@ -123,235 +82,224 @@
                          )
                          (never)
                         )
-                        (canon -relay- $status-0_test  #status-0_result_canon)
+                        (canon %init_peer_id% $successful_test  #successful_result_canon)
                        )
                       )
                      )
-                     (xor
-                      (match #status-0_result_canon.$.[0]! "ok"
-                       (ap true $result-0)
-                      )
-                      (ap false $result-0)
-                     )
+                     (ap "ok" $status-0)
                     )
-                    (canon -relay- $result-0  #result-fix-0)
+                    (call %init_peer_id% ("peer" "timeout") [6000 "timeout"] $status-0)
                    )
-                  )
-                 )
-                )
-                (xor
-                 (match #result-fix-0.$.[0]! false
-                  (ap "timeout exceeded" $error-0)
-                 )
-                 (seq
-                  (seq
-                   (canon -relay- $records  #records_canon)
-                   (call -relay- ("registry" "merge") [#records_canon] merged)
+                   (new $status-0_test
+                    (seq
+                     (fold $status-0 s
+                      (seq
+                       (seq
+                        (seq
+                         (call %init_peer_id% ("math" "add") [0 1] incr_idx)
+                         (ap s $status-0_test)
+                        )
+                        (canon %init_peer_id% $status-0_test  #status-0_iter_canon)
+                       )
+                       (xor
+                        (match #status-0_iter_canon.length incr_idx
+                         (null)
+                        )
+                        (next s)
+                       )
+                      )
+                      (never)
+                     )
+                     (canon %init_peer_id% $status-0_test  #status-0_result_canon)
+                    )
+                   )
                   )
                   (xor
-                   (match merged.$.success! false
-                    (ap merged.$.error! $error-0)
+                   (match #status-0_result_canon.$.[0]! "ok"
+                    (ap true $result-0)
                    )
-                   (ap merged.$.result! $result)
+                   (ap false $result-0)
                   )
                  )
+                 (canon %init_peer_id% $result-0  #result-fix-0)
                 )
                )
-               (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 2])
               )
-              (canon %init_peer_id% $result  #result-fix)
+             )
+             (xor
+              (match #result-fix-0.$.[0]! false
+               (ap "timeout exceeded" $error-0)
+              )
+              (seq
+               (seq
+                (canon %init_peer_id% $records  #records_canon)
+                (call %init_peer_id% ("registry" "merge") [#records_canon] merged)
+               )
+               (xor
+                (match merged.$.success! false
+                 (ap merged.$.error! $error-0)
+                )
+                (ap merged.$.result! $result)
+               )
+              )
              )
             )
+            (canon %init_peer_id% $result  #result-fix)
            )
           )
-          (canon %init_peer_id% $error-0  #push-to-stream-16)
          )
-         (ap #push-to-stream-16 $error)
         )
-        (canon %init_peer_id% $error  #push-to-stream-14)
+        (canon %init_peer_id% $error-0  #push-to-stream-11)
        )
-       (ap #push-to-stream-14 $errs_get)
+       (ap #push-to-stream-11 $error)
       )
-      (xor
-       (mismatch #result-fix []
-        (xor
+      (canon %init_peer_id% $error  #push-to-stream-9)
+     )
+     (ap #push-to-stream-9 $errs_get)
+    )
+    (xor
+     (mismatch #result-fix []
+      (seq
+       (seq
+        (seq
          (seq
           (seq
            (seq
             (seq
              (seq
-              (seq
+              (ap #result-fix.$.[0]! result-fix_flatten)
+              (fold result-fix_flatten r-0
                (seq
-                (seq
-                 (ap #result-fix.$.[0]! result-fix_flatten)
-                 (fold result-fix_flatten r-0
-                  (seq
-                   (xor
-                    (match r-0.$.metadata.key_id! "role=service"
-                     (ap r-0 $result-1)
-                    )
-                    (call %init_peer_id% ("op" "noop") [])
-                   )
-                   (next r-0)
-                  )
-                 )
-                )
-                (canon %init_peer_id% $result-1  #push-to-stream-103)
-               )
-               (ap #push-to-stream-103 $services)
-              )
-              (ap #result-fix.$.[0]! result-fix_flatten-0)
-             )
-             (fold result-fix_flatten-0 r-1-0
-              (seq
-               (xor
-                (match r-1-0.$.metadata.key_id! "role=healthcheckstorage"
-                 (ap r-1-0 $result-2)
-                )
-                (call %init_peer_id% ("op" "noop") [])
-               )
-               (next r-1-0)
-              )
-             )
-            )
-            (canon %init_peer_id% $result-2  #push-to-stream-113)
-           )
-           (ap #push-to-stream-113 $storages)
-          )
-          (par
-           (seq
-            (canon %init_peer_id% $services  #services_canon)
-            (fold #services_canon s-0
-             (par
-              (new $status
-               (seq
-                (seq
-                 (call -relay- ("op" "noop") [])
-                 (fold s-0.$.metadata.relay_id! -via-peer-
-                  (seq
-                   (call -via-peer- ("op" "noop") [])
-                   (next -via-peer-)
-                  )
-                 )
-                )
                 (xor
-                 (seq
-                  (seq
-                   (call s-0.$.metadata.peer_id! (s-0.$.metadata.service_id.[0]! "ok") [] ok)
-                   (xor
-                    (match ok true
-                     (ap "OK" $status)
-                    )
-                    (ap "BAD" $status)
-                   )
-                  )
-                  (par
-                   (seq
-                    (canon s-0.$.metadata.peer_id! $storages  #storages_canon)
-                    (fold #storages_canon storage-0
-                     (par
-                      (seq
-                       (seq
-                        (fold s-0.$.metadata.relay_id! -via-peer-
-                         (seq
-                          (call -via-peer- ("op" "noop") [])
-                          (next -via-peer-)
-                         )
-                        )
-                        (fold storage-0.$.metadata.relay_id! -via-peer-
-                         (seq
-                          (call -via-peer- ("op" "noop") [])
-                          (next -via-peer-)
-                         )
-                        )
-                       )
-                       (xor
-                        (seq
-                         (seq
-                          (seq
-                           (call storage-0.$.metadata.peer_id! ("peer" "timestamp_ms") [] ts)
-                           (new $status_test
-                            (seq
-                             (fold $status s
-                              (seq
-                               (seq
-                                (seq
-                                 (call storage-0.$.metadata.peer_id! ("math" "add") [0 1] incr_idx)
-                                 (ap s $status_test)
-                                )
-                                (canon storage-0.$.metadata.peer_id! $status_test  #status_iter_canon)
-                               )
-                               (xor
-                                (match #status_iter_canon.length incr_idx
-                                 (null)
-                                )
-                                (next s)
-                               )
-                              )
-                              (never)
-                             )
-                             (canon storage-0.$.metadata.peer_id! $status_test  #status_result_canon)
-                            )
-                           )
-                          )
-                          (ap #status_result_canon.$.[0]! status_result_canon_flatten)
-                         )
-                         (call storage-0.$.metadata.peer_id! (storage-0.$.metadata.service_id.[0]! "store_status") [status_result_canon_flatten s-0.$.metadata.peer_id! s-0.$.metadata.service_id.[0]! ts])
-                        )
-                        (seq
-                         (seq
-                          (fold storage-0.$.metadata.relay_id! -via-peer-
-                           (seq
-                            (call -via-peer- ("op" "noop") [])
-                            (next -via-peer-)
-                           )
-                          )
-                          (call -relay- ("op" "noop") [])
-                         )
-                         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 3])
-                        )
-                       )
-                      )
-                      (next storage-0)
-                     )
-                     (never)
-                    )
-                   )
-                   (null)
-                  )
+                 (match r-0.$.metadata.value! "role=service"
+                  (ap r-0 $result-1)
                  )
-                 (seq
-                  (seq
-                   (fold s-0.$.metadata.relay_id! -via-peer-
-                    (seq
-                     (call -via-peer- ("op" "noop") [])
-                     (next -via-peer-)
-                    )
-                   )
-                   (call -relay- ("op" "noop") [])
-                  )
-                  (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 4])
-                 )
+                 (call %init_peer_id% ("op" "noop") [])
                 )
+                (next r-0)
                )
               )
-              (next s-0)
              )
-             (never)
+             (canon %init_peer_id% $result-1  #push-to-stream-90)
             )
+            (ap #push-to-stream-90 $services)
            )
-           (null)
+           (ap #result-fix.$.[0]! result-fix_flatten-0)
+          )
+          (fold result-fix_flatten-0 r-1-0
+           (seq
+            (xor
+             (match r-1-0.$.metadata.value! "role=healthcheckstorage"
+              (ap r-1-0 $result-2)
+             )
+             (call %init_peer_id% ("op" "noop") [])
+            )
+            (next r-1-0)
+           )
           )
          )
-         (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 5])
+         (canon %init_peer_id% $result-2  #push-to-stream-100)
         )
+        (ap #push-to-stream-100 $storages)
        )
-       (call %init_peer_id% ("op" "noop") [])
+       (par
+        (seq
+         (canon %init_peer_id% $services  #services_canon)
+         (fold #services_canon s-0
+          (par
+           (new $status
+            (seq
+             (seq
+              (seq
+               (fold s-0.$.metadata.relay_id! -via-peer-
+                (seq
+                 (call -via-peer- ("op" "noop") [])
+                 (next -via-peer-)
+                )
+               )
+               (call s-0.$.metadata.peer_id! (s-0.$.metadata.service_id.[0]! "ok") [] ok)
+              )
+              (xor
+               (match ok true
+                (ap "OK" $status)
+               )
+               (ap "BAD" $status)
+              )
+             )
+             (par
+              (seq
+               (canon s-0.$.metadata.peer_id! $storages  #storages_canon)
+               (fold #storages_canon storage-0
+                (par
+                 (seq
+                  (seq
+                   (seq
+                    (seq
+                     (seq
+                      (fold s-0.$.metadata.relay_id! -via-peer-
+                       (seq
+                        (call -via-peer- ("op" "noop") [])
+                        (next -via-peer-)
+                       )
+                      )
+                      (fold storage-0.$.metadata.relay_id! -via-peer-
+                       (seq
+                        (call -via-peer- ("op" "noop") [])
+                        (next -via-peer-)
+                       )
+                      )
+                     )
+                     (call storage-0.$.metadata.peer_id! ("peer" "timestamp_ms") [] ts)
+                    )
+                    (new $status_test
+                     (seq
+                      (fold $status s
+                       (seq
+                        (seq
+                         (seq
+                          (call storage-0.$.metadata.peer_id! ("math" "add") [0 1] incr_idx)
+                          (ap s $status_test)
+                         )
+                         (canon storage-0.$.metadata.peer_id! $status_test  #status_iter_canon)
+                        )
+                        (xor
+                         (match #status_iter_canon.length incr_idx
+                          (null)
+                         )
+                         (next s)
+                        )
+                       )
+                       (never)
+                      )
+                      (canon storage-0.$.metadata.peer_id! $status_test  #status_result_canon)
+                     )
+                    )
+                   )
+                   (ap #status_result_canon.$.[0]! status_result_canon_flatten)
+                  )
+                  (call storage-0.$.metadata.peer_id! (storage-0.$.metadata.service_id.[0]! "store_status") [status_result_canon_flatten s-0.$.metadata.peer_id! s-0.$.metadata.service_id.[0]! ts])
+                 )
+                 (next storage-0)
+                )
+                (never)
+               )
+              )
+              (null)
+             )
+            )
+           )
+           (next s-0)
+          )
+          (never)
+         )
+        )
+        (null)
+       )
       )
      )
+     (call %init_peer_id% ("op" "noop") [])
     )
    )
   )
  )
- (call %init_peer_id% ("errorHandlingSrv" "error") [%last_error% 6])
 )

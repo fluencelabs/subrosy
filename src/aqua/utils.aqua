@@ -17,8 +17,7 @@ func get_records(resource_id: string, consistency_level: i16) -> ?[]Record, *Err
 func find_records(records: []Record, key: string) -> *Record:
   result: *Record
   for r <- records:
-    k = r.metadata.key_id
-    if k == key:
+    if r.metadata.value == key:
       result <<- r
   <- result
 
