@@ -18,8 +18,15 @@ const SUBNET = "8QHLESWXC5UKheU9UJ9MthgTTxaUULnPAdw2VFrmnn7o"
 func check_examples():
     records, errs_get <- get_records(SUBNET, 5)
     if records != nil:
-        services <- find_records(records!, SERVICE)
-        storages <- find_records(records!, STORAGE)
+        services: *Record
+        for r <- records!:
+            if r.metadata.value == SERVICE:
+                services <<- r
+
+        storages: *Record
+        for r <- records!:
+            if r.metadata.value == STORAGE:
+                storages <<- r
 
         for s <- services par:
             on s.metadata.peer_id via s.metadata.relay_id:
@@ -36,3 +43,37 @@ func check_examples():
                         ts <- Peer.timestamp_ms()
                         HealthCheckStorage storage.metadata.service_id!
                         HealthCheckStorage.store_status(status!, s.metadata.peer_id, s.metadata.service_id!, ts)
+
+func check_examples_seq() -> []string:
+    stored: *string
+
+    records, errs_get <- get_records(SUBNET, 5)
+    if records != nil:
+        services: *Record
+        for r <- records!:
+            if r.metadata.value == SERVICE:
+                services <<- r
+
+        storages: *Record
+        for r <- records!:
+            if r.metadata.value == STORAGE:
+                storages <<- r
+
+        for s <- services:
+            on s.metadata.peer_id via s.metadata.relay_id:
+                ExampleService s.metadata.service_id!
+                ok <- ExampleService.ok()
+                status: ?string
+                if ok:
+                    status <<- "OK"
+                else:
+                    status <<- "BAD"
+
+                for storage <- storages:
+                    on storage.metadata.peer_id via storage.metadata.relay_id:
+                        ts <- Peer.timestamp_ms()
+                        HealthCheckStorage storage.metadata.service_id!
+                        HealthCheckStorage.store_status(status!, s.metadata.peer_id, s.metadata.service_id!, ts)
+                        stored <<- status!
+
+    <- stored

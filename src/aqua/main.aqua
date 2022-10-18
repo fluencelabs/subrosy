@@ -202,8 +202,8 @@ func join_subnet(subnet: ResourceId, host: PeerId, service_id: string) -> bool, 
 
     <- registered, script_ids, error_reg
 
-func get_health(subnet: ResourceId) -> []string:
-    statuses: *string
+func get_health(subnet: ResourceId) -> [][]HealthStatus:
+    statuses: *[]HealthStatus
 
     records, error_resolve <- get_records(subnet, 3) -- '3' acks
 
@@ -224,11 +224,7 @@ func get_health(subnet: ResourceId) -> []string:
             for srv <- services par:
                 on storage.metadata.peer_id via storage.metadata.relay_id:
                     HealthCheckStorage storage.metadata.service_id!
-                    status <- HealthCheckStorage.get_status(srv.metadata.service_id!)
-                    if status == nil:
-                        statuses <<- "no status :("
-                    else:
-                        statuses <<- status!.status
+                    statuses <- HealthCheckStorage.get_status(srv.metadata.service_id!)
 
         join statuses[ROp.array_length(services) - 1]
         par Peer.timeout(PARTICLE_TTL * 8 / 10, "")
