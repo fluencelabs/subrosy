@@ -114,8 +114,9 @@ func create_subnet(subnet_label: string, air_path: string, ipfs_hosts: []PeerId)
     <- subnet, uploaded_len, errors
 
 -- Register deployed HealthStorage service to subnet
-func register_storage(subnet: ResourceId, storage_id: string, host: PeerId):
+func register_storage(subnet: ResourceId, storage_id: string, host: PeerId) -> bool, []Error:
     registered, err_reg <- registerServiceRecord(subnet, STORAGE, host, ?[storage_id])
+    <- registered, err_reg
 
 
 -- Install subnet's healthcheck scripts as scheduled scripts to `target_host` peer
@@ -163,23 +164,28 @@ func enable_healthcheck(subnet: string, host: PeerId) -> [][]Error:
 
     <- errors
 
-func join_subnet(subnet: ResourceId, host: PeerId, service_id: string) -> []Error:
+func join_subnet(subnet: ResourceId, host: PeerId, service_id: string) -> bool, []Error:
     errors: *[]Error
 
-    registered, error_reg <- registerServiceRecord(subnet, SERVICE, host, ?[service_id])
     -- TODO: check that service wasn't registered yet?
+    registered, error_reg <- registerServiceRecord(subnet, SERVICE, host, ?[service_id])
     if registered:
-        enable_healthcheck(subnet, host)
+        errs_hc <- enable_healthcheck(subnet, host)
+        for e <- errs_hc:
+            errors <<- e
 
-    <- error_reg
+    <- registered, error_reg
 
-func get_health(subnet: string) -> []HealthStatus:
+service HOp("op"):
+    array_length(hss: []HealthStatus) -> u32
+
+service ROp("op"):
+    array_length(hss: []Record) -> u32
+
+func get_health(subnet: ResourceId) -> []HealthStatus:
     statuses: *HealthStatus
 
-    id, error_cre <- createResource(subnet)
-
-    if id != nil:
-        records, error_resolve <- get_records(subnet, 3) -- '3' acks
+    records, error_resolve <- get_records(subnet, 3) -- '3' acks
 
     storages <- find_records(records!, STORAGE)
     services <- find_records(records!, SERVICE)
@@ -189,4 +195,29 @@ func get_health(subnet: string) -> []HealthStatus:
                 HealthCheckStorage storage.metadata.service_id!
                 statuses <- HealthCheckStorage.get_status(srv.metadata.service_id!)
 
+    join statuses[ROp.array_length(services) - 1]
+    par Peer.timeout(PARTICLE_TTL * 8 / 10, "")
+
     <- statuses
+
+        -- "peer_id": "12D3KooWDcpWuyrMTDinqNgmXAuRdfd2mTdY9VoXZSAet2pDzh6r",
+        -- "relay_id": [],
+        -- "service_id": [
+        --   "505f4b4f-eb41-4b40-a668-e04ce4400203"
+        -- ],
+        -- "solution": [],
+        -- "timestamp_issued": 1666101386,
+        -- "value": "role=healthcheckstorage"
+
+func list_records(subnet: ResourceId) -> [][]string, []Error:
+    minified_records: *[]string
+
+    records, error_resolve <- get_records(subnet, 3) -- '3' acks
+    if records != nil:
+        for r <- records!:
+            if r.metadata.service_id != nil:
+                minified_records <<- [r.metadata.peer_id, r.metadata.value, r.metadata.service_id!]
+            else:
+                minified_records <<- [r.metadata.peer_id, r.metadata.value]
+
+    <- minified_records, error_resolve
