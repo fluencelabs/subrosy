@@ -25,5 +25,7 @@
 #   ENV2: arg2
 
 version: 0
-type: rust
-name: example
+type: compiled
+name: sqlite3
+volumes:
+  tmp: ./tmp

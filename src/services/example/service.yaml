@@ -32,4 +32,3 @@ name: example
 modules:
   facade:
     get: modules/example
-

@@ -30,6 +30,7 @@
 version: 0
 name: healthstore
 modules:
+  sqlite3:
+    get: modules/sqlite3
   facade:
     get: modules/healthstore
-
