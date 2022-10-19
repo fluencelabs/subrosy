@@ -71,7 +71,6 @@ function App() {
         const subnet = arg.target.value;
         setSubnet(subnet);
         setIsLoading(true);
-        // await get_health(subnet);
         const res = await getServices(subnet);
         setIsLoading(false);
         setServices(res);

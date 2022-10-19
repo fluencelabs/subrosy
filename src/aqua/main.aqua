@@ -1,5 +1,6 @@
 module Main declares *
-export App, scenario, test
+-- export App, scenario, test
+export get_health, RConsole, NConsole, Console
 
 import "@fluencelabs/registry/resources-api.aqua"
 import "@fluencelabs/registry/registry-service.aqua"
@@ -10,7 +11,7 @@ import "utils.aqua"
 import "ipfs.aqua"
 import "healthcheck_service.aqua"
 import "scheduled.aqua"
-import App from "../../.fluence/aqua/deployed.app.aqua"
+-- import App from "../../.fluence/aqua/deployed.app.aqua"
 -- import App from "deployed.app.aqua"
 
 
@@ -26,9 +27,6 @@ service ROp("op"):
 
 service RConsole("run-console"):
     print(r: Record)
-
--- service Console("run-console"):
---     print(msgs: []string)
 
 service NConsole("run-console"):
     print(n: u32)
@@ -304,39 +302,39 @@ func list_scheduled(subnet: ResourceId) -> [][]ScriptInfo, []Error:
 
     <- scripts, error_resolve
 
-func scenario() -> string, ?ResourceId, string, ?[][]HealthStatus, string, ?[][]string, string, ?[]string:
-    errors: *Error
-    statuses: ?[][]HealthStatus
-    records: ?[][]string
-    scripts: ?[]string
+-- func scenario() -> string, ?ResourceId, string, ?[][]HealthStatus, string, ?[][]string, string, ?[]string:
+--     errors: *Error
+--     statuses: ?[][]HealthStatus
+--     records: ?[][]string
+--     scripts: ?[]string
 
-    resource_id, a, errs_cre <- create_subnet(
-        "folex",
-        "/Users/folex/Development/fluencelabs/subrosy/src/scheduled/scheduled.simple.air", ["12D3KooWHCJbJKGDfCgHSoCuK9q4STyRnVveqLoXAPBbXHTZx9Cv"]
-    )
+--     resource_id, a, errs_cre <- create_subnet(
+--         "folex",
+--         "/Users/folex/Development/fluencelabs/subrosy/src/scheduled/scheduled.simple.air", ["12D3KooWHCJbJKGDfCgHSoCuK9q4STyRnVveqLoXAPBbXHTZx9Cv"]
+--     )
 
-    if resource_id != nil:
-        Console.print(["created resource", resource_id!])
-        services <- App.services()
-        storage = services.healthstore.default[0]
-        registered, err_reg <- register_storage(resource_id!, storage.serviceId, storage.peerId)
-        for e <- err_reg:
-            errors <<- e
-        if registered:
-            Console.print(["registered storage", storage.serviceId])
-            for srv <- services.example.default:
-                status, scripts, errs_join <- join_subnet(resource_id!, srv.peerId, srv.serviceId)
-                for e <- errs_join:
-                    errors <<- e
-            check_examples_seq()
-            statuses <- get_health(resource_id!)
-            records <- list_records(resource_id!)
-        else:
-            Console.print(["error registering storage"])
-            Console.print(err_reg)
+--     if resource_id != nil:
+--         Console.print(["created resource", resource_id!])
+--         services <- App.services()
+--         storage = services.healthstore.default[0]
+--         registered, err_reg <- register_storage(resource_id!, storage.serviceId, storage.peerId)
+--         for e <- err_reg:
+--             errors <<- e
+--         if registered:
+--             Console.print(["registered storage", storage.serviceId])
+--             for srv <- services.example.default:
+--                 status, scripts, errs_join <- join_subnet(resource_id!, srv.peerId, srv.serviceId)
+--                 for e <- errs_join:
+--                     errors <<- e
+--             check_examples_seq()
+--             statuses <- get_health(resource_id!)
+--             records <- list_records(resource_id!)
+--         else:
+--             Console.print(["error registering storage"])
+--             Console.print(err_reg)
 
 
-    <- "resource_id", resource_id, "statuses", statuses, "records", records, "scripts", scripts
+--     <- "resource_id", resource_id, "statuses", statuses, "records", records, "scripts", scripts
 
 
 func test():
