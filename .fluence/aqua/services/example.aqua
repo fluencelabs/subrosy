@@ -1,0 +1,5 @@
+module Example declares *
+
+service Example:
+  ok() -> bool
+  set_ok(ok: bool)  

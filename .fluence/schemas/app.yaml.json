@@ -1,0 +1,77 @@
+{
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "number",
+      "enum": [
+        3
+      ]
+    },
+    "services": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "peerId": {
+                "type": "string"
+              },
+              "serviceId": {
+                "type": "string"
+              },
+              "blueprintId": {
+                "type": "string"
+              },
+              "keyPairName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "peerId",
+              "serviceId",
+              "blueprintId",
+              "keyPairName"
+            ]
+          }
+        },
+        "required": []
+      },
+      "required": []
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "relays": {
+      "type": [
+        "string",
+        "array",
+        "null"
+      ],
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "kras",
+            "stage",
+            "testnet"
+          ]
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "nullable": true
+    }
+  },
+  "required": [
+    "version",
+    "services",
+    "timestamp"
+  ]
+}

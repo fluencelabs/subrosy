@@ -1,0 +1,141 @@
+{
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "number",
+      "enum": [
+        0
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "modules": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "get": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "rust",
+              "compiled"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "maxHeapSize": {
+            "type": "string",
+            "nullable": true
+          },
+          "loggerEnabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "loggingMask": {
+            "type": "number",
+            "nullable": true
+          },
+          "volumes": {
+            "type": "object",
+            "nullable": true,
+            "required": []
+          },
+          "preopenedFiles": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "envs": {
+            "type": "object",
+            "nullable": true,
+            "required": []
+          },
+          "mountedBinaries": {
+            "type": "object",
+            "nullable": true,
+            "required": []
+          }
+        },
+        "required": [
+          "get"
+        ]
+      },
+      "properties": {
+        "facade": {
+          "type": "object",
+          "properties": {
+            "get": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "nullable": true,
+              "enum": [
+                "rust",
+                "compiled"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "nullable": true
+            },
+            "maxHeapSize": {
+              "type": "string",
+              "nullable": true
+            },
+            "loggerEnabled": {
+              "type": "boolean",
+              "nullable": true
+            },
+            "loggingMask": {
+              "type": "number",
+              "nullable": true
+            },
+            "volumes": {
+              "type": "object",
+              "nullable": true,
+              "required": []
+            },
+            "preopenedFiles": {
+              "type": "array",
+              "nullable": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "envs": {
+              "type": "object",
+              "nullable": true,
+              "required": []
+            },
+            "mountedBinaries": {
+              "type": "object",
+              "nullable": true,
+              "required": []
+            }
+          },
+          "required": [
+            "get"
+          ]
+        }
+      },
+      "required": [
+        "facade"
+      ]
+    }
+  },
+  "required": [
+    "version",
+    "name",
+    "modules"
+  ]
+}

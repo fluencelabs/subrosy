@@ -1,0 +1,19 @@
+export App
+
+data ServiceIdsItem:
+  blueprintId: string
+  peerId: string
+  serviceId: string
+
+data HealthstoreDeploys:
+  default: []ServiceIdsItem
+
+data ExampleDeploys:
+  default: []ServiceIdsItem
+
+data Services:
+  healthstore: HealthstoreDeploys
+  example: ExampleDeploys
+
+service App("App"):
+  services: -> Services

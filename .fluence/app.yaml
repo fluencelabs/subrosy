@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=schemas/app.yaml.json
+
+version: 3
+services:
+  healthstore:
+    default:
+      - blueprintId: 0e81e37549faab9091a71391580b8ccc39207ba396d25a66719f2ffb2ee40614
+        serviceId: 505f4b4f-eb41-4b40-a668-e04ce4400203
+        peerId: 12D3KooWDcpWuyrMTDinqNgmXAuRdfd2mTdY9VoXZSAet2pDzh6r
+        keyPairName: auto-generated
+  example:
+    default:
+      - blueprintId: c05367b60a8a9daa1afdcd2f27f92e3bbfdb025f2f01d463eaafdce6742b69ef
+        serviceId: 0e803d39-fc49-4819-94e3-a898325b6617
+        peerId: 12D3KooWHCJbJKGDfCgHSoCuK9q4STyRnVveqLoXAPBbXHTZx9Cv
+        keyPairName: auto-generated
+timestamp: 2022-10-18T13:47:10.347Z
+relays: stage

@@ -1,0 +1,13 @@
+module Healthstore declares *
+
+data HealthStatus:
+  status: string
+  peer_id: string
+  service_id: string
+  last_update: u64
+
+service Healthstore:
+  get_all_statuses() -> []HealthStatus
+  get_status(service_id: string) -> []HealthStatus
+  store(status: HealthStatus)  
+  store_status(status: string, host: string, service_id: string, timestamp: u64)  

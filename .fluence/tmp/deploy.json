@@ -1,0 +1,10 @@
+{
+  "default": {
+    "modules": [
+      {
+        "name": "example",
+        "path": "/Users/folex/Development/fluencelabs/subrosy/src/services/example/modules/example/target/wasm32-wasi/release/example.wasm"
+      }
+    ]
+  }
+}

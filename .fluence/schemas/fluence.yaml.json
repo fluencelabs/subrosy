@@ -1,0 +1,215 @@
+{
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "number",
+      "enum": [
+        2
+      ]
+    },
+    "services": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "get": {
+            "type": "string"
+          },
+          "deploy": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "keyPairName": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "deployId": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "number",
+                  "minimum": 1,
+                  "nullable": true
+                },
+                "peerId": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "peerIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "nullable": true
+                },
+                "distribution": {
+                  "type": "string",
+                  "enum": [
+                    "even",
+                    "random"
+                  ],
+                  "nullable": true
+                },
+                "overrideModules": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "get": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "type": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                          "rust",
+                          "compiled"
+                        ]
+                      },
+                      "name": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "maxHeapSize": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "loggerEnabled": {
+                        "type": "boolean",
+                        "nullable": true
+                      },
+                      "loggingMask": {
+                        "type": "number",
+                        "nullable": true
+                      },
+                      "volumes": {
+                        "type": "object",
+                        "nullable": true,
+                        "required": []
+                      },
+                      "preopenedFiles": {
+                        "type": "array",
+                        "nullable": true,
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "envs": {
+                        "type": "object",
+                        "nullable": true,
+                        "required": []
+                      },
+                      "mountedBinaries": {
+                        "type": "object",
+                        "nullable": true,
+                        "required": []
+                      }
+                    },
+                    "required": [],
+                    "nullable": true
+                  },
+                  "nullable": true,
+                  "required": []
+                }
+              },
+              "required": [
+                "deployId"
+              ]
+            }
+          },
+          "keyPairName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "get",
+          "deploy"
+        ]
+      },
+      "required": [],
+      "nullable": true
+    },
+    "relays": {
+      "type": [
+        "string",
+        "array",
+        "null"
+      ],
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "kras",
+            "stage",
+            "testnet"
+          ]
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "nullable": true
+    },
+    "peerIds": {
+      "type": "object",
+      "nullable": true,
+      "required": [],
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "keyPairName": {
+      "type": "string",
+      "nullable": true
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "npm": {
+          "type": "object",
+          "properties": {
+            "@fluencelabs/aqua": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "@fluencelabs/aqua"
+          ]
+        },
+        "cargo": {
+          "type": "object",
+          "properties": {
+            "marine": {
+              "type": "string"
+            },
+            "mrepl": {
+              "type": "string"
+            }
+          },
+          "required": []
+        }
+      },
+      "required": [
+        "npm",
+        "cargo"
+      ]
+    },
+    "appTSPath": {
+      "type": "string",
+      "nullable": true
+    },
+    "appJSPath": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "required": [
+    "version"
+  ]
+}
