@@ -54,3 +54,4 @@ services:
     get: src/services/example
     deploy:
       - deployId: default
+

@@ -1,3 +1,6 @@
+module Main declares *
+export scenario
+
 import "@fluencelabs/registry/resources-api.aqua"
 import "@fluencelabs/registry/registry-service.aqua"
 import "@fluencelabs/aqua-lib/builtin.aqua"
@@ -6,6 +9,10 @@ import "@fluencelabs/aqua-ipfs/ipfs.aqua"
 import "utils.aqua"
 import "ipfs.aqua"
 import "healthcheck_service.aqua"
+import "scheduled.aqua"
+-- import App from "../../.fluence/aqua/deployed.app.aqua"
+import App from "deployed.app.aqua"
+
 
 alias Error: string
 alias CID: string
@@ -20,8 +27,8 @@ service ROp("op"):
 service RConsole("run-console"):
     print(r: Record)
 
-service Console("run-console"):
-    print(msgs: []string)
+-- service Console("run-console"):
+--     print(msgs: []string)
 
 service NConsole("run-console"):
     print(n: u32)
@@ -187,20 +194,33 @@ func enable_healthcheck(subnet: string, host: PeerId) -> []string, [][]Error:
 
     <- script_ids, errors
 
-func join_subnet(subnet: ResourceId, host: PeerId, service_id: string) -> bool, []string, []Error:
+func join_subnet(subnet: ResourceId, host: PeerId, service_id: string) -> []string, []string, []Error:
     errors: *[]Error
     script_ids: *string
+    status: *string
 
-    -- TODO: check that service wasn't registered yet?
-    registered, error_reg <- registerServiceRecord(subnet, SERVICE, host, ?[service_id])
-    if registered:
-        scripts, errs_hc <- enable_healthcheck(subnet, host)
-        for e <- errs_hc:
-            errors <<- e
-        for s <- scripts:
-            script_ids <<- s
+    -- check whether this service was already registered
+    records, error <- get_records(subnet, 5)
+    if records != nil:
+        already_registered: ?bool
+        for r <- records!:
+            if r.metadata.value == SERVICE:
+                if r.metadata.service_id! == service_id:
+                    already_registered <<- true
+        if already_registered == nil:
+            -- if not yet registered, then register
+            registered, error_reg <- registerServiceRecord(subnet, SERVICE, host, ?[service_id])
+            if registered:
+                status <<- "registered"
+                scripts, errs_hc <- enable_healthcheck(subnet, host)
+                for e <- errs_hc:
+                    errors <<- e
+                for s <- scripts:
+                    script_ids <<- s
+        else:
+            status <<- "service was already registered"
 
-    <- registered, script_ids, error_reg
+    <- status, script_ids, error_reg
 
 func get_health(subnet: ResourceId) -> [][]HealthStatus:
     statuses: *[]HealthStatus
@@ -249,9 +269,9 @@ func list_records(subnet: ResourceId) -> [][]string, []Error:
     if records != nil:
         for r <- records!:
             if r.metadata.service_id != nil:
-                minified_records <<- [r.metadata.peer_id, r.metadata.value, r.metadata.service_id!]
+                minified_records <<- [r.metadata.peer_id, r.metadata.value, r.metadata.service_id!, r.metadata.issued_by]
             else:
-                minified_records <<- [r.metadata.peer_id, r.metadata.value]
+                minified_records <<- [r.metadata.peer_id, r.metadata.value, r.metadata.issued_by]
 
     <- minified_records, error_resolve
 
@@ -279,3 +299,27 @@ func list_scheduled(subnet: ResourceId) -> [][]ScriptInfo, []Error:
                     scripts <- Script.list()
 
     <- scripts, error_resolve
+
+func scenario() -> ?ResourceId, ?[][]HealthStatus, ?[][]string, ?[]string:
+    errs_join: *[]Error
+    statuses: ?[][]HealthStatus
+    records: ?[][]string
+    scripts: ?[]string
+
+    resource_id, a, errs_cre <- create_subnet(
+        "folex",
+        "/Users/folex/Development/fluencelabs/subrosy/src/scheduled/scheduled.simple.air", ["12D3KooWHCJbJKGDfCgHSoCuK9q4STyRnVveqLoXAPBbXHTZx9Cv"]
+    )
+
+    if resource_id != nil:
+        services <- App.services()
+        storage = services.healthstore.default[0]
+        registered <- register_storage(resource_id!, storage.serviceId, storage.peerId)
+        if registered:
+            for srv <- services.example.default:
+                status, scripts, errs_join <- join_subnet(resource_id!, srv.peerId, srv.serviceId)
+            check_examples_seq()
+            statuses <- get_health(resource_id!)
+            records <- list_records(resource_id!)
+
+    <- resource_id, statuses, records, scripts
