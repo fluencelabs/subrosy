@@ -90,3 +90,16 @@ func script_records(records: []Record) -> []Record:
             result <<- r
 
     <- result
+
+func list_records(subnet: ResourceId) -> [][]string, []Error:
+    minified_records: *[]string
+
+    records, error_resolve <- get_records(subnet, 3) -- '3' acks
+    if records != nil:
+        for r <- records!:
+            if r.metadata.service_id != nil:
+                minified_records <<- [r.metadata.peer_id, r.metadata.value, r.metadata.service_id!, r.metadata.issued_by]
+            else:
+                minified_records <<- [r.metadata.peer_id, r.metadata.value, r.metadata.issued_by]
+
+    <- minified_records, error_resolve

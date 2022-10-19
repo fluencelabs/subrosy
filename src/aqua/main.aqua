@@ -24,6 +24,11 @@ service HOp("op"):
 
 service ROp("op"):
     array_length(hss: []Record) -> u32
+    identity(hss: []Record) -> string
+
+
+service NOp("op"):
+    identity(u: u32) -> string
 
 service RConsole("run-console"):
     print(r: Record)
@@ -86,13 +91,21 @@ func create_healthcheck(subnet: ResourceId, air_path: string, ipfs_host: PeerId)
 
     cid, upload_err <- upload_air(air_path, ipfs_host)
 
-    Console.print(cid)
 
     if cid != nil:
+        Console.print(["uploaded air", cid!])
         registered, err_reg <- registerServiceRecord(subnet, IPFS_HEALTHCHECK_SCRIPT, ipfs_host, ?[cid!])
+        records <- list_records(subnet)
+        if registered:
+            Console.print(["registered IPFS_HEALTHCHECK_SCRIPT record", subnet])
+            for rs <- records:
+                Console.print(rs)
+        else:
+            Console.print(["did not register IPFS_HEALTHCHECK_SCRIPT record"])
         if err_reg != nil:
             errors <<- err_reg
     else:
+        Console.print(["failed to upload air"])
         errors <<- ["upload_air", ipfs_host, air_path, upload_err!]
 
     <- cid, errors
@@ -151,6 +164,7 @@ func install_healthcheck_scripts(scripts: []Record, target_host: PeerId) -> []st
         if r.metadata.value == IPFS_HEALTHCHECK_SCRIPT:
             cid = r.metadata.service_id!
             if contains(installed_cids, cid) == false: -- if we hadn't install this cid yet, go install it
+                Console.print(["will register healthcheck", cid])
                 maddr <- get_external_api_multiaddr(r.metadata.peer_id)
                 maddrs <<- maddr
                 if maddr.success:
@@ -163,27 +177,34 @@ func install_healthcheck_scripts(scripts: []Record, target_host: PeerId) -> []st
                         errors <<- ?["ipfs.get", cid, get.error]
                 else:
                     errors <<- ?["get_external_api_multiaddr", r.metadata.peer_id, maddr.error]
+            else:
+                Console.print(["won't register healthcheck", cid])
+                Console.print(installed_cids)
 
     <- installed_scripts, errors
 
 -- It's the key owner's job to make sure that there are enough HealthStorage services
 -- maybe there are NO storage services? it's all hidden inside the healthcheck script anyway
 
-func enable_healthcheck(subnet: string, host: PeerId) -> []string, [][]Error:
+func enable_healthcheck(subnet: ResourceId, host: PeerId) -> []string, [][]Error:
     errors: *[]Error
     script_ids: *string
 
     records, error <- get_records(subnet, 5)
 
+
     if records != nil:
-        Console.print(["NOT EMPTY"])
+        -- Console.print(["enable_healthcheck, records:", ROp.identity(records!)])
+        Console.print(["enable_healthcheck sees these records", subnet])
+        for rs <- list_records(subnet):
+            Console.print(rs)
+
         -- if contains_peer_id(records!, host) == false:
         scripts: *Record
         for r <- records!:
-            Console.print([r.metadata.value])
             if r.metadata.value == IPFS_HEALTHCHECK_SCRIPT:
                 scripts <<- r
-        NConsole.print(ROp.array_length(scripts))
+        Console.print(["found healthcheck script records:", NOp.identity(ROp.array_length(scripts))])
         -- scripts <- find_records(records!, IPFS_HEALTHCHECK_SCRIPT)
         installed_scripts, install_errs <- install_healthcheck_scripts(scripts, host)
         for err <- install_errs:
@@ -210,6 +231,7 @@ func join_subnet(subnet: ResourceId, host: PeerId, service_id: string) -> []stri
                 if r.metadata.service_id! == service_id:
                     already_registered <<- true
         if already_registered == nil:
+            Console.print(["service isn't yet registered"])
             -- if not yet registered, then register
             registered, error_reg <- registerServiceRecord(subnet, SERVICE, host, ?[service_id])
             if registered:
@@ -220,6 +242,7 @@ func join_subnet(subnet: ResourceId, host: PeerId, service_id: string) -> []stri
                 for s <- scripts:
                     script_ids <<- s
         else:
+            Console.print(["service is already registered"])
             status <<- "service was already registered"
 
     <- status, script_ids, error_reg
@@ -261,21 +284,6 @@ func get_health(subnet: ResourceId) -> [][]HealthStatus:
         -- "solution": [],
         -- "timestamp_issued": 1666101386,
         -- "value": "role=healthcheckstorage"
-
-
-
-func list_records(subnet: ResourceId) -> [][]string, []Error:
-    minified_records: *[]string
-
-    records, error_resolve <- get_records(subnet, 3) -- '3' acks
-    if records != nil:
-        for r <- records!:
-            if r.metadata.service_id != nil:
-                minified_records <<- [r.metadata.peer_id, r.metadata.value, r.metadata.service_id!, r.metadata.issued_by]
-            else:
-                minified_records <<- [r.metadata.peer_id, r.metadata.value, r.metadata.issued_by]
-
-    <- minified_records, error_resolve
 
 func list_scheduled(subnet: ResourceId) -> [][]ScriptInfo, []Error:
     scripts: *[]ScriptInfo
@@ -332,15 +340,4 @@ func list_scheduled(subnet: ResourceId) -> [][]ScriptInfo, []Error:
 --         else:
 --             Console.print(["error registering storage"])
 --             Console.print(err_reg)
-
-
 --     <- "resource_id", resource_id, "statuses", statuses, "records", records, "scripts", scripts
-
-
-func test():
-    subnet = "8QHLESWXC5UKheU9UJ9MthgTTxaUULnPAdw2VFrmnn7o"
-    records, error_resolve <- get_records(subnet, 5) -- '3' acks
-    services <- find_records(records!, SERVICE)
-    for s <- services:
-        RConsole.print(s)
-        Console.print(["test"])
