@@ -28,7 +28,8 @@
         "eslint": "^8.25.0"
     },
     "scripts": {
-        "prestart": "copy-marine public",
+        "prestart": "(cd .. ; ./compile-aqua.sh)",
+        "postinstall": "copy-marine public",
         "start": "react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",
