@@ -1,5 +1,6 @@
 import { get_health } from '../aqua/main';
 import { ServiceHealthCheckProps } from '../components/ServiceHealthCheck';
+import { FluencePeer, Fluence } from '@fluencelabs/fluence/dist/index';
 
 export const services: Array<ServiceHealthCheckProps> = Array.from({ length: 20 }, (v, k) => {
     return {
@@ -26,7 +27,7 @@ type Unarray<T> = T extends Array<infer U> ? U : T;
 type HealthCheck = Unarray<Unarray<Awaited<ReturnType<typeof get_health>>>>;
 
 export const getServices = async (subnet: string) => {
-    const rawData = await get_health(subnet);
+    const rawData = await get_health(subnet, { ttl: 15000 });
     return rawData.flatMap((list) => list.map(mapHealthChecks));
 };
 
@@ -41,3 +42,7 @@ const mapHealthChecks = (x: HealthCheck) => {
         timestamp: new Date(x.last_update),
     };
 };
+
+console.log(get_health);
+console.log(Fluence);
+console.log(FluencePeer);

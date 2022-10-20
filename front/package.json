@@ -5,7 +5,7 @@
     "dependencies": {
         "@emotion/react": "^11.10.4",
         "@emotion/styled": "^11.10.4",
-        "@fluencelabs/fluence": "0.26.3-snapshot-3",
+        "@fluencelabs/fluence": "0.26.3-snapshot-7",
         "@fluencelabs/fluence-network-environment": "1.0.13",
         "@mui/icons-material": "^5.10.9",
         "@mui/material": "^5.10.9",
@@ -28,7 +28,7 @@
         "eslint": "^8.25.0"
     },
     "scripts": {
-        "prestart": "(cd .. ; ./compile-aqua.sh)",
+        "_prestart": "(cd .. ; ./compile-aqua.sh)",
         "postinstall": "copy-marine public",
         "start": "react-scripts start",
         "build": "react-scripts build",

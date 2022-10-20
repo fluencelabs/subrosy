@@ -22,8 +22,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-
-src/aqua
 public/avm.wasm
 public/marine-js.wasm
 public/marine-js.web.js
