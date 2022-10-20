@@ -11,7 +11,7 @@ import {
     Typography,
 } from '@mui/material';
 import { Container } from '@mui/system';
-import { getServices } from './data/mockData';
+import { getServices, HealthCheck } from './data/mockData';
 import { ServiceHealthCheck, ServiceHealthCheckProps } from './components/ServiceHealthCheck';
 import { styled, alpha } from '@mui/material/styles';
 import Lan from '@mui/icons-material/Lan';
