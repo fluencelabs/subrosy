@@ -20,6 +20,7 @@ import {
     experimental_extendTheme as extendTheme,
 } from '@mui/material/styles';
 import { indigo } from '@mui/material/colors';
+import { convertToObject } from 'typescript';
 
 const theme = extendTheme({
     colorSchemes: {
@@ -32,6 +33,16 @@ const theme = extendTheme({
         },
     },
 });
+
+const wait = async (timeout: number): Promise<void> => {
+    return new Promise((resolve) => {
+        setTimeout(resolve, timeout);
+    });
+};
+
+const randomInt = (min: number, max: number) => {
+    return Math.random() * (max - min) + min;
+};
 
 function App() {
     const [subnet, setSubnet] = useState('');
@@ -48,11 +59,19 @@ function App() {
 
         setSubnet(newSubnet);
         setIsLoading(true);
-        await new Promise((resolve) => {
-            setTimeout(resolve, 2000);
-        });
         const res = getServices(newSubnet);
-        setServices(res);
+        if (res.length === 0) {
+            await wait(2000);
+            setServices([]);
+        } else {
+            let tmp: any = [];
+            for (let s of res) {
+                await wait(randomInt(50, 500));
+                tmp = [...tmp, s];
+                setServices(tmp);
+            }
+        }
+
         setIsLoading(false);
     };
 
@@ -72,16 +91,12 @@ function App() {
             </div>
             {isLoading && <LinearProgress />}
             <Container maxWidth="xl">
-                {!isLoading &&
-                    (services.length === 0 ? (
-                        <div className="not-found">Subnet not found</div>
-                    ) : (
-                        <div className="main-content">
-                            {services.map((x) => (
-                                <ServiceHealthCheck {...x} />
-                            ))}
-                        </div>
+                {services.length === 0 && <div className="not-found">Subnet not found</div>}
+                <div className="main-content">
+                    {services.map((x) => (
+                        <ServiceHealthCheck {...x} />
                     ))}
+                </div>
             </Container>
         </CssVarsProvider>
     );
