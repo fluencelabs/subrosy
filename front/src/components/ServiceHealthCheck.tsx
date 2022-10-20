@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Moment from 'react-moment';
+import { randomAlive } from '../data/mockData';
 
 export interface ServiceHealthCheckProps {
     key: string;
@@ -10,7 +11,25 @@ export interface ServiceHealthCheckProps {
 }
 
 export const ServiceHealthCheck = (props: ServiceHealthCheckProps) => {
-    const className = props.status === 'alive' ? 'card card-alive' : 'card card-dead';
+    const [status, setStatus] = useState(props.status);
+    const [timestamp, setTimestamp] = useState(props.timestamp);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (Math.random() > 0.1) {
+                return;
+            }
+
+            setTimestamp(new Date());
+            setStatus(randomAlive());
+        }, 5000);
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, []);
+
+    const className = status === 'alive' ? 'card card-alive' : 'card card-dead';
 
     return (
         <div className={className} key={props.key}>
@@ -23,7 +42,7 @@ export const ServiceHealthCheck = (props: ServiceHealthCheckProps) => {
             <div className="updated">
                 <span>Updated: </span>
                 <span>
-                    <Moment fromNow>{props.timestamp}</Moment>
+                    <Moment fromNow>{timestamp}</Moment>
                 </span>
             </div>
         </div>

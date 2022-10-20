@@ -60,13 +60,17 @@ const isAlive = () => {
     return Math.random() > 0.1;
 };
 
+export const randomAlive = () => {
+    return isAlive() ? 'alive' : 'dead';
+};
+
 const mapHealthChecks = (x: HealthCheck): ServiceHealthCheckProps => {
     console.log(x.status);
     return {
         key: x.peer_id + x.service_id,
         peerId: x.peer_id,
         serviceId: x.service_id,
-        status: isAlive() ? 'alive' : 'dead',
+        status: randomAlive(),
         timestamp: new Date(x.last_update),
     };
 };
