@@ -1,8 +1,8 @@
-import { Box, Card, CardContent, CardHeader, InputLabel, TextField, Typography } from '@mui/material';
-import moment from 'moment';
-import Adjust from '@mui/icons-material/Adjust';
+import React from 'react';
+import Moment from 'react-moment';
 
 export interface ServiceHealthCheckProps {
+    key: string;
     peerId: string;
     serviceId: string;
     status: 'dead' | 'alive';
@@ -10,31 +10,22 @@ export interface ServiceHealthCheckProps {
 }
 
 export const ServiceHealthCheck = (props: ServiceHealthCheckProps) => {
+    const className = props.status === 'alive' ? 'card card-alive' : 'card card-dead';
+
     return (
-        <Card sx={{ width: 300 }}>
-            <CardHeader
-                title={''}
-                sx={{
-                    marginBottom: 0,
-                    paddingBottom: 0,
-                }}
-                action={<Adjust color={props.status === 'alive' ? 'success' : 'error'} />}
-            />
-            <CardContent>
-                <Box marginY={1}>
-                    <InputLabel>Host peer ID</InputLabel>
-                    <Typography variant="body1">{props.peerId}</Typography>
-                </Box>
+        <div className={className} key={props.key}>
+            <div className="title">Host peer ID</div>
+            <div className="val">{props.peerId}</div>
 
-                <Box marginY={1}>
-                    <InputLabel>Service ID</InputLabel>
-                    <Typography variant="body1">{props.serviceId}</Typography>
-                </Box>
+            <div className="title">Service ID</div>
+            <div className="val">{props.serviceId}</div>
 
-                <Typography align="right" variant="body2">
-                    {moment(props.timestamp).fromNow()}
-                </Typography>
-            </CardContent>
-        </Card>
+            <div className="updated">
+                <span>Updated: </span>
+                <span>
+                    <Moment fromNow>{props.timestamp}</Moment>
+                </span>
+            </div>
+        </div>
     );
 };

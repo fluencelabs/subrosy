@@ -1,0 +1,126 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  height: 100vh;
+
+  background-image: radial-gradient(ellipse at 200px 130vh,
+      rgb(60, 60, 187) 0%,
+      black 50%);
+
+  overflow: hidden;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+// $card-bg: rgb(65, 65, 65);
+$card-bg: rgba(77, 77, 77, 0.5);
+
+
+$card-w: 250px;
+$card-h: 130px;
+
+.card {
+  display: inline-block;
+
+  border-radius: 10px;
+
+  padding: 12px;
+
+  color: white;
+
+  width: $card-w;
+  max-width: $card-w;
+  height: $card-h;
+  max-height: $card-h;
+
+  &-alive {
+    background-image: radial-gradient(ellipse at 200px 0px,
+        green -100%,
+        $card-bg 100%);
+  }
+
+  &-dead {
+
+    background-image: radial-gradient(ellipse at 200px 130px,
+        red -100%,
+        $card-bg 40%);
+  }
+}
+
+.main-content {
+  margin-top: 20px;  
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
+}
+
+.title {
+  text-transform: uppercase;
+  font-size: larger;
+  margin: 2px;
+}
+
+.val {
+  margin: 2px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.not-found {
+  color: white;
+  font-size: x-large;
+  text-align: center;
+}
+
+.updated {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  & span {
+    display: block;
+  }
+}
+
+.header {
+  font-size: x-large;
+  color: white;
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+   
+  & input {
+    color: white;
+
+    padding: 0 70px;
+    
+    font-size: large;
+
+    margin-left: 40px;
+    height: 50px;
+    width: 400px;
+    border-radius: 3rem;
+    border: none;
+    outline: none;
+
+    background-color: $card-bg;
+
+    &:hover, &:focus {
+      background-color: rgb(39, 39, 39);
+    }
+  }
+}

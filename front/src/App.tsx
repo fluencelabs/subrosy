@@ -17,6 +17,23 @@ import { styled, alpha } from '@mui/material/styles';
 import Lan from '@mui/icons-material/Lan';
 import { get_health } from './aqua/main';
 import { init } from './fluence';
+import {
+    Experimental_CssVarsProvider as CssVarsProvider,
+    experimental_extendTheme as extendTheme,
+} from '@mui/material/styles';
+import { pink, indigo } from '@mui/material/colors';
+
+const theme = extendTheme({
+    colorSchemes: {
+        light: {
+            palette: {
+                primary: {
+                    main: indigo['900'],
+                },
+            },
+        },
+    },
+});
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -65,13 +82,22 @@ function App() {
     const [isLoading, setIsLoading] = useState(false);
     const [services, setServices] = useState<ServiceHealthCheckProps[]>([]);
 
-    useEffect(init, []);
+    useEffect(() => {
+        init();
+        setServices(getServices('awesome_fluence'));
+    }, []);
 
     const search: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement> = async (arg) => {
-        const subnet = arg.target.value;
-        setSubnet(subnet);
+        const newSubnet = arg.target.value;
+        if (subnet === newSubnet || newSubnet === '') {
+            return;
+        }
+        setSubnet(newSubnet);
         setIsLoading(true);
-        const res = await getServices(subnet);
+        await new Promise((resolve) => {
+            setTimeout(resolve, 2000);
+        });
+        const res = getServices(newSubnet);
         setIsLoading(false);
         setServices(res);
     };
@@ -80,18 +106,10 @@ function App() {
     if (isLoading) {
         content = <LinearProgress />;
     } else if (services.length === 0) {
-        content = <div>Subnet not found</div>;
+        content = <div className="not-found">Subnet not found</div>;
     } else {
         content = (
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    justifyContent: 'center',
-                    gap: 20,
-                }}
-            >
+            <div className="main-content">
                 {services.map((x) => (
                     <ServiceHealthCheck {...x} />
                 ))}
@@ -100,8 +118,20 @@ function App() {
     }
 
     return (
-        <>
-            <AppBar position="static" style={{ marginBottom: 40 }}>
+        <CssVarsProvider theme={theme}>
+            <div className="header">
+                <h1>SUBROSY</h1>
+                <Lan
+                    style={{
+                        position: 'relative',
+                        verticalAlign: 'center',
+                        left: 90,
+                        textAlign: 'center',
+                    }}
+                />
+                <input type="text" onBlur={search}></input>
+            </div>
+            {/* <AppBar position="static" style={{ marginBottom: 40 }}>
                 <Toolbar variant="regular">
                     <IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
                         Subrosy
@@ -117,9 +147,9 @@ function App() {
                         />
                     </Search>
                 </Toolbar>
-            </AppBar>
+            </AppBar> */}
             <Container maxWidth="xl">{content}</Container>
-        </>
+        </CssVarsProvider>
     );
 }
 

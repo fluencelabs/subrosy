@@ -63,6 +63,7 @@ const isAlive = () => {
 const mapHealthChecks = (x: HealthCheck): ServiceHealthCheckProps => {
     console.log(x.status);
     return {
+        key: x.peer_id + x.service_id,
         peerId: x.peer_id,
         serviceId: x.service_id,
         status: isAlive() ? 'alive' : 'dead',
@@ -70,10 +71,7 @@ const mapHealthChecks = (x: HealthCheck): ServiceHealthCheckProps => {
     };
 };
 
-export const getServices = async (subnet: string): Promise<Array<ServiceHealthCheckProps>> => {
-    await new Promise((resolve) => {
-        setTimeout(resolve, 2000);
-    });
+export const getServices = (subnet: string): Array<ServiceHealthCheckProps> => {
     if (subnet === 'awesome_fluence') {
         const kindaRawData = mockdata.flatMap((x) => {
             return x.services.map((srv) => {
@@ -97,5 +95,4 @@ export const getServices = async (subnet: string) => {
     const rawData = await get_health(subnet, { ttl: 15000 });
     return rawData.flatMap((list) => list.map(mapHealthChecks));
 };
-
 */
