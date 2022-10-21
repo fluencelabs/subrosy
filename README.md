@@ -15,7 +15,7 @@ for srv <- services.example.default:
     status, scripts, errs_join <- join_subnet(resource_id, srv.peerId, srv.serviceId)
 ```
 
-Then go to our frontend and find that subnet, you will see your service there.
+Then go to our frontend https://fluence.one/subrosy/ and find that subnet, you will see your service there.
 
 Or you can call `get_health` in Aqua and gather health statuses there:
 ```
