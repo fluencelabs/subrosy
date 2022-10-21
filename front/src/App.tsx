@@ -64,6 +64,7 @@ function App() {
             await wait(2000);
             setServices([]);
         } else {
+            await wait(1000);
             let tmp: any = [];
             for (let s of res) {
                 await wait(randomInt(50, 500));
