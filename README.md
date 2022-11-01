@@ -1,6 +1,6 @@
 <p>
 <img align="right" width=300 src="https://user-images.githubusercontent.com/1949356/199219723-1ff7067b-538a-4838-b419-9a972bd5b7a3.png" alt="Stable Diffusion: small rose flower deep under water in solitude under surface with light shining through the water and shadows visible">
-# subrosy
+<h1> subrosy </h1>
 
 'rosy' means healthy and enthusiastic
 
